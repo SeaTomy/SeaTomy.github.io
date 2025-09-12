@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeaTomy - CTF Team</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #000;
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #000;
+            background: #000;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin: 0 1.5rem;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #007bff;
+        }
+
+        nav ul li a.active {
+            color: #007bff;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 2rem 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #0056b3;
+        }
+
+        /* About Section */
+        .about {
+            background: #f8f9fa;
+            padding: 3rem 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .about h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .about p {
+            font-size: 1.1rem;
+            color: #666;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* Skills Grid */
+        .skills {
+            margin: 3rem 0;
+        }
+
+        .skills h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .skill-card h3 {
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        footer p {
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul li {
+                margin: 0 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding-top: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">S</div>
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="info.html">Info</a></li>
+            <li><a href="Awards.html">Awards</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <h1>SeaTomy</h1>
+            <p>Elite CTF Team | Breaking Barriers, Finding Flags</p>
+            <a href="info.html" class="cta-button">Learn More</a>
+        </section>
+
+        <section class="about">
+            <h2>Welcome to SeaTomy</h2>
+            <p>We are a dedicated Capture The Flag (CTF) team passionate about cybersecurity, penetration testing, and solving complex security challenges. Our team combines expertise, creativity, and relentless determination to excel in competitive cybersecurity.</p>
+        </section>
+
+        <section class="skills">
+            <h2>Our Expertise</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <h3>Web Security</h3>
+                    <p>Advanced web application penetration testing and vulnerability assessment</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Binary Exploitation</h3>
+                    <p>Memory corruption, buffer overflows, and reverse engineering</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Cryptography</h3>
+                    <p>Cryptanalysis, cipher breaking, and security protocol analysis</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Digital Forensics</h3>
+                    <p>Evidence recovery, malware analysis, and incident response</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Network Security</h3>
+                    <p>Traffic analysis, protocol exploitation, and infrastructure security</p>
+                </div>
+                <div class="skill-card">
+                    <h3>OSINT</h3>
+                    <p>Open source intelligence gathering and information analysis</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 SeaTomy CTF Team. All rights reserved.</p>
+    </footer>
+</body>
+</html>
