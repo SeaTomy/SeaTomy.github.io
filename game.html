@@ -1,0 +1,2505 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reply 2012: Code Panic Booth</title>
+  <style>
+    :root {
+      --xp-blue: #245edb;
+      --xp-blue-dark: #1747ad;
+      --xp-green: #3aa53a;
+      --cream: #ece4ce;
+      --ink: #121927;
+      --danger: #ff2d55;
+      --ok: #37d67a;
+      --warn: #ffe66d;
+      --panel: rgba(238, 238, 224, 0.95);
+      --mono: "Lucida Console", "Courier New", monospace;
+      --ui: Tahoma, "MS PGothic", "Malgun Gothic", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #061127;
+      color: var(--ink);
+      font-family: var(--ui);
+    }
+
+    body {
+      min-width: 320px;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 20% 22%, rgba(255, 255, 255, 0.45) 0 2px, transparent 3px),
+        radial-gradient(circle at 52% 17%, rgba(255, 255, 255, 0.42) 0 1px, transparent 2px),
+        linear-gradient(#2e9eff 0 36%, #78c850 36% 62%, #347832 62% 100%);
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.45;
+      background:
+        linear-gradient(90deg, transparent 0 38%, rgba(255, 255, 255, 0.45) 38% 39%, transparent 39% 62%, rgba(255, 255, 255, 0.35) 62% 63%, transparent 63%),
+        linear-gradient(180deg, transparent 0 52%, rgba(47, 71, 54, 0.25) 52% 100%);
+      clip-path: polygon(0 0, 100% 0, 100% 73%, 0 82%);
+    }
+
+    .lab {
+      position: absolute;
+      inset: 0 0 44px;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .floor {
+      position: absolute;
+      left: -5vw;
+      right: -5vw;
+      bottom: 0;
+      height: 33vh;
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(180deg, #d9c6a2, #a9855f);
+      transform: perspective(450px) rotateX(50deg);
+      transform-origin: bottom center;
+      box-shadow: inset 0 18px 45px rgba(56, 36, 18, 0.35);
+    }
+
+    .back-wall {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 26vh;
+      height: 26vh;
+      background:
+        linear-gradient(90deg, rgba(31, 45, 58, 0.08) 1px, transparent 1px) 0 0 / 72px 100%,
+        linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(223, 232, 214, 0.74));
+      border-top: 5px solid rgba(255, 255, 255, 0.55);
+      border-bottom: 7px solid rgba(71, 91, 86, 0.35);
+    }
+
+    .whiteboard {
+      position: absolute;
+      right: clamp(22px, 6vw, 92px);
+      bottom: 36vh;
+      width: min(360px, 30vw);
+      height: 128px;
+      border: 8px solid #d2d2ca;
+      background:
+        linear-gradient(90deg, transparent 0 52%, rgba(93, 129, 119, 0.12) 52% 53%, transparent 53%),
+        repeating-linear-gradient(0deg, transparent 0 17px, rgba(93, 129, 119, 0.18) 18px, transparent 19px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(230, 244, 238, 0.88));
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.17);
+      opacity: 0.82;
+    }
+
+    .whiteboard::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 38%;
+      height: 54px;
+      border: 2px solid rgba(64, 103, 94, 0.28);
+      background:
+        linear-gradient(90deg, transparent 0 48%, rgba(64, 103, 94, 0.22) 48% 52%, transparent 52%),
+        repeating-linear-gradient(0deg, transparent 0 12px, rgba(64, 103, 94, 0.2) 13px, transparent 14px);
+    }
+
+    .whiteboard::after {
+      content: "";
+      position: absolute;
+      right: 24px;
+      top: 22px;
+      width: 42px;
+      height: 34px;
+      border-radius: 2px;
+      background: rgba(255, 230, 109, 0.72);
+      box-shadow:
+        -58px 8px 0 rgba(116, 205, 255, 0.54),
+        -18px 48px 0 rgba(255, 137, 152, 0.56),
+        0 82px 0 -18px rgba(39, 43, 51, 0.34);
+    }
+
+    .clock {
+      position: absolute;
+      left: 11vw;
+      bottom: 39vh;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: #f8f8ee;
+      border: 7px solid #b5ac92;
+      box-shadow: 0 9px 18px rgba(0, 0, 0, 0.16);
+    }
+
+    .clock::before,
+    .clock::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 4px;
+      border-radius: 4px;
+      background: #1d2b36;
+      transform-origin: center bottom;
+    }
+
+    .clock::before {
+      height: 25px;
+      transform: translate(-50%, -100%) rotate(0deg);
+    }
+
+    .clock::after {
+      height: 19px;
+      transform: translate(-50%, -100%) rotate(92deg);
+    }
+
+    .desk-row {
+      position: absolute;
+      left: 2vw;
+      right: 2vw;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(92px, 1fr));
+      gap: clamp(12px, 2.5vw, 34px);
+      align-items: end;
+    }
+
+    .desk-row.back {
+      bottom: 24vh;
+      transform: scale(0.82);
+      opacity: 0.82;
+      filter: blur(0.2px);
+    }
+
+    .desk-row.front {
+      bottom: 7vh;
+      transform: scale(1.05);
+    }
+
+    .station {
+      position: relative;
+      height: clamp(105px, 15vw, 178px);
+    }
+
+    .station::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 28%;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(180deg, #c6985f, #8b5d33);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.24);
+    }
+
+    .monitor {
+      position: absolute;
+      left: 50%;
+      bottom: 26%;
+      width: min(80%, 145px);
+      height: 54%;
+      transform: translateX(-50%);
+      border-radius: 11px 11px 7px 7px;
+      background: linear-gradient(145deg, #f1ead7, #b7ad92);
+      border: 4px solid #756f60;
+      box-shadow: inset -8px -8px 0 rgba(59, 57, 50, 0.12), 0 13px 18px rgba(0, 0, 0, 0.24);
+    }
+
+    .monitor::before {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 14%;
+      bottom: 20%;
+      border-radius: 4px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+        radial-gradient(circle at 62% 35%, rgba(122, 255, 167, 0.75), transparent 16%),
+        linear-gradient(135deg, #133f78, #031320);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.75);
+    }
+
+    .monitor::after {
+      content: "";
+      position: absolute;
+      left: 38%;
+      right: 38%;
+      bottom: -18%;
+      height: 20%;
+      background: linear-gradient(180deg, #958c74, #5c5549);
+      clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+    }
+
+    .main-window {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      top: calc(50% - 18px);
+      width: min(1040px, calc(100vw - 32px));
+      height: min(680px, calc(100vh - 86px));
+      min-height: 530px;
+      transform: translate(-50%, -50%);
+      border: 2px solid #083f9f;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.48);
+      background: var(--panel);
+      display: grid;
+      grid-template-rows: 34px 1fr;
+      overflow: hidden;
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 8px 0 10px;
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+      background:
+        linear-gradient(180deg, #63a7ff 0, #2d6de5 16%, #1354c4 62%, #0d3f9b 100%);
+      user-select: none;
+    }
+
+    .title-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+    }
+
+    .app-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background:
+        linear-gradient(90deg, #e83f3f 0 48%, #2bbf63 48%),
+        linear-gradient(#f6e04d 0 48%, #3689ef 48%);
+      background-blend-mode: screen;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+      flex: 0 0 auto;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 4px;
+      flex: 0 0 auto;
+    }
+
+    .window-control {
+      width: 23px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 3px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 18px;
+      text-align: center;
+      background: linear-gradient(180deg, #83b5ff, #1f61ce);
+      box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.38);
+    }
+
+    .window-control.close {
+      background: linear-gradient(180deg, #f9856e, #cb3522);
+    }
+
+    .content {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(238px, 300px) 1fr;
+      min-height: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(234, 234, 218, 0.92)),
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.018) 0 1px, transparent 1px 4px);
+    }
+
+    .side {
+      min-height: 0;
+      padding: 18px 16px;
+      border-right: 1px solid #9e9e84;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(214, 214, 194, 0.82)),
+        linear-gradient(90deg, rgba(38, 96, 190, 0.12), transparent);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .brand {
+      margin: 0 0 14px;
+      font-size: 28px;
+      line-height: 1.04;
+      letter-spacing: 0;
+      color: #1643a4;
+      text-shadow: 1px 1px 0 #fff, 2px 2px 0 rgba(0, 0, 0, 0.13);
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: #4b5365;
+    }
+
+    .status-panel {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .meter {
+      overflow: hidden;
+      border: 1px solid #777;
+      background: #fff;
+      box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .meter-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #263648;
+    }
+
+    .meter-fill {
+      height: 18px;
+      width: 0;
+      background:
+        linear-gradient(90deg, #1fae53, #ffe66d 58%, #ff2d55);
+      transition: width 120ms linear;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .readout-item {
+      padding: 10px;
+      border: 1px solid #9c9c80;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.72);
+      min-width: 0;
+    }
+
+    .readout-label {
+      display: block;
+      margin-bottom: 4px;
+      color: #566071;
+      font-size: 11px;
+    }
+
+    .readout-value {
+      display: block;
+      font-family: var(--mono);
+      font-size: 19px;
+      line-height: 1;
+      color: #152033;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    .fixed-time-card {
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid #8a8a76;
+      border-radius: 5px;
+      color: #1b293e;
+      background: linear-gradient(180deg, #fff, #d7d7c5);
+      box-shadow: inset 1px 1px 0 #fff;
+    }
+
+    .fixed-time-label {
+      display: block;
+      margin-bottom: 2px;
+      color: #5a6270;
+      font-size: 11px;
+    }
+
+    .fixed-time-value {
+      display: block;
+      color: #173e91;
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .primary-actions {
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 8px;
+    }
+
+    .start-btn,
+    .reset-btn {
+      min-height: 44px;
+      border-radius: 5px;
+      border: 1px solid #08440d;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(180deg, #79d85e, #238623 48%, #156615);
+      box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.55), 0 2px 0 rgba(0, 0, 0, 0.25);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    .reset-btn {
+      border-color: #6b6b5c;
+      color: #263648;
+      background: linear-gradient(180deg, #fff, #cfcfb9);
+      text-shadow: none;
+      font-size: 22px;
+    }
+
+    .start-btn:disabled {
+      filter: grayscale(0.65);
+      cursor: default;
+      opacity: 0.72;
+    }
+
+    .log {
+      flex: 1 1 82px;
+      min-height: 64px;
+      max-height: 128px;
+      margin-top: 18px;
+      padding: 9px;
+      overflow: hidden;
+      border: 1px solid #6a6a55;
+      background: #06170b;
+      color: #84ff91;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.45;
+      box-shadow: inset 0 0 18px rgba(0, 255, 87, 0.13);
+    }
+
+    .stage {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .panic-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 2px solid #a51320;
+      border-radius: 4px;
+      color: #fff;
+      background:
+        repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.23) 0 10px, transparent 10px 20px),
+        linear-gradient(180deg, #ff4c66, #b10a1a);
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.42);
+    }
+
+    .panic-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .panic-code {
+      flex: 0 0 auto;
+      font-family: var(--mono);
+      font-size: 12px;
+      opacity: 0.95;
+    }
+
+    .mission-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 50px;
+      padding: 9px 12px;
+      border: 1px solid #76765f;
+      border-radius: 4px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(219, 219, 197, 0.96));
+      box-shadow: inset 1px 1px 0 #fff, 0 3px 0 rgba(0, 0, 0, 0.12);
+    }
+
+    .mission-kicker {
+      padding: 5px 7px;
+      border: 1px solid #a01c2b;
+      border-radius: 3px;
+      color: #fff;
+      background: linear-gradient(180deg, #ff6178, #bb1124);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.34);
+    }
+
+    .mission-title {
+      min-width: 0;
+      color: #14233a;
+      font-size: clamp(18px, 2.2vw, 27px);
+      line-height: 1.1;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .mission-detail {
+      color: #4c5666;
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .terminal-shell {
+      position: relative;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 34px 1fr auto;
+      border: 1px solid #0b0e13;
+      border-radius: 5px;
+      overflow: hidden;
+      background: #05070c;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 34px rgba(0, 0, 0, 0.22);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px;
+      color: #d3d8e2;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: linear-gradient(180deg, #283447, #121822);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .leds {
+      display: flex;
+      gap: 5px;
+      flex: 0 0 auto;
+    }
+
+    .led {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 9px currentColor;
+    }
+
+    .led.red {
+      color: #ff4265;
+      background: currentColor;
+    }
+
+    .led.yellow {
+      color: #ffe66d;
+      background: currentColor;
+    }
+
+    .led.green {
+      color: #42ff8d;
+      background: currentColor;
+    }
+
+    .code-wrap {
+      position: relative;
+      min-height: 0;
+      padding: 22px;
+      overflow: auto;
+      color: #cad7ef;
+      font-family: var(--mono);
+      font-size: clamp(13px, 1.55vw, 18px);
+      line-height: 1.58;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.045) 50%, rgba(0, 0, 0, 0.045) 50%) 0 0 / 100% 4px,
+        radial-gradient(circle at 92% 0, rgba(255, 45, 85, 0.16), transparent 38%),
+        #07101d;
+    }
+
+    .code-wrap:focus-within {
+      outline: 3px solid rgba(255, 230, 109, 0.38);
+      outline-offset: -5px;
+    }
+
+    .code-line {
+      min-height: 1.58em;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .ch {
+      display: inline-block;
+      min-width: 0.48em;
+      border-bottom: 1px solid transparent;
+    }
+
+    .ch.space {
+      min-width: 0.5em;
+    }
+
+    .ch.newline {
+      min-width: 1.1em;
+      opacity: 0.8;
+    }
+
+    .ch.pending {
+      color: rgba(202, 215, 239, 0.47);
+    }
+
+    .ch.correct {
+      color: #9effb8;
+      text-shadow: 0 0 8px rgba(66, 255, 141, 0.36);
+    }
+
+    .ch.wrong {
+      color: #ff8aa0;
+      background: rgba(255, 45, 85, 0.24);
+      border-color: rgba(255, 45, 85, 0.85);
+    }
+
+    .typing-caret {
+      display: inline-block;
+      width: 2px;
+      height: 1.22em;
+      margin: 0 1px 0 0;
+      vertical-align: -0.18em;
+      background: #ffe66d;
+      box-shadow: 0 0 8px rgba(255, 230, 109, 0.7);
+      animation: caretBlink 700ms steps(1) infinite;
+    }
+
+    .typing-caret.input-error {
+      background: #ff2d55;
+      box-shadow: none;
+    }
+
+    @keyframes caretBlink {
+      50% {
+        opacity: 0.14;
+      }
+    }
+
+    .typing-input {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .input-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 46px;
+      padding: 8px 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      color: #9fb1cf;
+      background: #03060b;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .input-status strong {
+      color: #ffe66d;
+      font-weight: 400;
+    }
+
+    .screen-overlay {
+      position: absolute;
+      inset: 34px 0 0;
+      z-index: 8;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 180ms ease, transform 180ms ease;
+      background: rgba(2, 7, 14, 0.58);
+    }
+
+    .screen-overlay.visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .result-box {
+      width: min(760px, 94%);
+      max-height: min(92%, 780px);
+      overflow: auto;
+      border: 2px solid #fff;
+      border-radius: 6px;
+      color: #fff;
+      text-align: center;
+      padding: 28px 24px 24px;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+    }
+
+    .screen-overlay.ready .result-box {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent),
+        linear-gradient(135deg, #1149bc, #0a1f63);
+    }
+
+    .screen-overlay.login .result-box,
+    .screen-overlay.ranking .result-box {
+      color: #14233a;
+      text-align: left;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(222, 222, 202, 0.98));
+      box-shadow: inset 1px 1px 0 #fff, 0 22px 60px rgba(0, 0, 0, 0.42);
+    }
+
+    .screen-overlay.warning .result-box {
+      color: #fff;
+      background:
+        repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.22) 0 12px, transparent 12px 24px),
+        linear-gradient(180deg, #ff4964, #a90418 58%, #62010c);
+      border-color: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 45, 85, 0.26), 0 22px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .screen-overlay.success .result-box {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent),
+        linear-gradient(135deg, #0c773c, #052b21);
+    }
+
+    .screen-overlay.fail .result-box {
+      border-radius: 0;
+      background: #0037a6;
+      font-family: var(--mono);
+      text-align: left;
+      box-shadow: none;
+    }
+
+    .result-title {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: 0;
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .result-copy {
+      margin: 0 0 20px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .overlay-panel[hidden] {
+      display: none;
+    }
+
+    .login-grid {
+      display: grid;
+      gap: 12px;
+      width: min(360px, 100%);
+      margin: 0 auto;
+    }
+
+    .login-label,
+    .player-label {
+      display: grid;
+      gap: 5px;
+      color: #3f4b5d;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .login-field,
+    .player-field {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid #777764;
+      border-radius: 3px;
+      padding: 8px 10px;
+      color: #111b2c;
+      background: #fff;
+      box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.18);
+      font-family: var(--mono);
+    }
+
+    .login-error {
+      min-height: 18px;
+      color: #b10a1a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .warning-panel {
+      width: min(560px, 100%);
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .warning-icon {
+      display: grid;
+      place-items: center;
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 16px;
+      border: 4px solid #fff;
+      border-radius: 50%;
+      color: #ff2d55;
+      background: #fff;
+      font-size: 50px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 0 22px rgba(255, 255, 255, 0.35);
+    }
+
+    .warning-title {
+      margin: 0 0 10px;
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: 0;
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.36);
+    }
+
+    .warning-copy {
+      margin: 0 0 22px;
+      font-size: 16px;
+      line-height: 1.55;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.32);
+    }
+
+    .ranking-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .ranking-title {
+      margin: 0 0 6px;
+      color: #173e91;
+      font-size: clamp(28px, 4vw, 45px);
+      line-height: 1;
+      letter-spacing: 0;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .ranking-copy {
+      margin: 0;
+      color: #4b5365;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .ranking-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid #8a8a76;
+      color: #172235;
+      background: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid rgba(90, 90, 72, 0.28);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .ranking-table th {
+      color: #fff;
+      background: linear-gradient(180deg, #428eff, #1047ad);
+      font-size: 11px;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    .ranking-table td:first-child,
+    .ranking-table td:nth-child(3),
+    .ranking-table td:nth-child(4),
+    .ranking-table td:nth-child(5) {
+      font-family: var(--mono);
+    }
+
+    .ranking-empty {
+      margin: 0;
+      padding: 26px 12px;
+      border: 1px dashed #8a8a76;
+      color: #586274;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.52);
+      font-size: 13px;
+    }
+
+    .score-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 18px 0 20px;
+    }
+
+    .score-chip {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.16);
+      min-width: 0;
+    }
+
+    .score-chip span {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+      opacity: 0.78;
+    }
+
+    .score-chip strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: var(--mono);
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .overlay-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .overlay-action {
+      min-width: 170px;
+      min-height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      border-radius: 4px;
+      color: #152033;
+      font-weight: 800;
+      background: linear-gradient(180deg, #fff, #d5d5c5);
+      box-shadow: inset 1px 1px 0 #fff, 0 2px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .overlay-action.secondary {
+      min-width: 132px;
+      color: #27364c;
+      border-color: #8a8a76;
+      background: linear-gradient(180deg, #fff, #cfcfb9);
+    }
+
+    .popup-layer {
+      position: relative;
+      z-index: 7;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      flex: 0 0 clamp(92px, 15vh, 126px);
+      margin-top: 12px;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .alert-window {
+      position: relative;
+      width: 100%;
+      border: 2px solid #1046ad;
+      border-radius: 7px 7px 0 0;
+      background: #eeeedf;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
+      animation: popIn 160ms ease both;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+      }
+    }
+
+    .alert-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 27px;
+      padding: 0 6px 0 9px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      background: linear-gradient(180deg, #428eff, #1047ad);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.42);
+    }
+
+    .alert-close {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #ff8f7b, #ce3724);
+      color: #fff;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .alert-body {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 9px;
+      align-items: center;
+      padding: 13px 12px 14px;
+      color: #1b293e;
+      font-size: 13px;
+    }
+
+    .alert-symbol {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 24px;
+      background: radial-gradient(circle at 35% 30%, #fff 0 7%, #ff5570 8%, #b40019 72%);
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3px #a0a0a0;
+    }
+
+    .glitch {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      pointer-events: none;
+      opacity: 0;
+      mix-blend-mode: screen;
+      background:
+        linear-gradient(90deg, rgba(255, 0, 72, 0.25), transparent 17%, rgba(0, 207, 255, 0.18) 28%, transparent 60%),
+        repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 255, 255, 0.12) 8px, transparent 10px);
+    }
+
+    .glitch.active {
+      animation: glitchFlash 240ms steps(2) 1;
+    }
+
+    @keyframes glitchFlash {
+      0%,
+      100% {
+        opacity: 0;
+        transform: translateX(0);
+      }
+      35% {
+        opacity: 0.72;
+        transform: translateX(-8px);
+      }
+      70% {
+        opacity: 0.45;
+        transform: translateX(7px);
+      }
+    }
+
+    .taskbar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      height: 44px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      color: #fff;
+      background:
+        linear-gradient(180deg, #3b8cff 0, #1d5fd2 15%, #124ab2 64%, #0c368b 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36);
+      user-select: none;
+    }
+
+    .start-menu {
+      height: 100%;
+      min-width: 118px;
+      padding: 0 16px 0 12px;
+      border-radius: 0 18px 18px 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.55);
+      color: #fff;
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 900;
+      background:
+        radial-gradient(circle at 24px 20px, #fff 0 5px, transparent 6px),
+        linear-gradient(180deg, #78df67, #268827 56%, #146013);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.55);
+    }
+
+    .task-buttons {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      height: 100%;
+      padding: 6px 10px;
+      overflow: hidden;
+    }
+
+    .task-button {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      width: min(270px, 38vw);
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 4px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 0.12));
+      box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.18);
+      color: #fff;
+      font-size: 12px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .tray {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      background: linear-gradient(180deg, #24a7ef, #0c78c8);
+      border-left: 1px solid rgba(255, 255, 255, 0.34);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .network {
+      width: 18px;
+      height: 16px;
+      background:
+        linear-gradient(90deg, transparent 0 2px, #fff 2px 5px, transparent 5px 7px, #fff 7px 10px, transparent 10px),
+        linear-gradient(180deg, transparent 0 10px, #fff 10px 13px, transparent 13px);
+      opacity: 0.92;
+    }
+
+    .shake {
+      animation: shake 260ms linear 1;
+    }
+
+    @keyframes shake {
+      20% {
+        transform: translate(calc(-50% - 6px), calc(-50% + 2px));
+      }
+      40% {
+        transform: translate(calc(-50% + 5px), calc(-50% - 1px));
+      }
+      60% {
+        transform: translate(calc(-50% - 3px), calc(-50% - 3px));
+      }
+      80% {
+        transform: translate(calc(-50% + 4px), calc(-50% + 2px));
+      }
+    }
+
+    .danger-mode .panic-strip {
+      animation: pulseDanger 850ms ease-in-out infinite;
+    }
+
+    @keyframes pulseDanger {
+      50% {
+        filter: saturate(1.7) brightness(1.14);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .main-window {
+        top: calc(50% - 12px);
+        height: calc(100vh - 68px);
+        min-height: 0;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      .side {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+        border-right: 0;
+        border-bottom: 1px solid #9e9e84;
+      }
+
+      .brand {
+        margin: 0;
+        font-size: 21px;
+      }
+
+      .subtitle,
+      .log {
+        display: none;
+      }
+
+      .status-panel {
+        margin: 0;
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+      }
+
+      .ranking-head {
+        grid-template-columns: 1fr;
+      }
+
+      .ranking-table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .score-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stage {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      .mission-card {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .mission-detail {
+        display: none;
+      }
+
+      .panic-title {
+        font-size: 14px;
+      }
+
+      .panic-code {
+        display: none;
+      }
+
+      .code-wrap {
+        padding: 14px;
+        font-size: 13px;
+      }
+
+      .popup-layer {
+        height: 96px;
+        margin-top: 0;
+      }
+
+      .desk-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .desk-row.back {
+        display: none;
+      }
+
+      .whiteboard {
+        width: 56vw;
+        right: 6vw;
+      }
+
+      .clock {
+        left: 6vw;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .readout {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .readout-item {
+        padding: 7px;
+      }
+
+      .readout-label {
+        font-size: 10px;
+      }
+
+      .readout-value {
+        font-size: 15px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .score-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .input-status {
+        font-size: 11px;
+      }
+
+      .task-button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <section class="lab" aria-hidden="true">
+      <div class="back-wall"></div>
+      <div class="whiteboard"></div>
+      <div class="clock"></div>
+      <div class="desk-row back">
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+      </div>
+      <div class="desk-row front">
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+        <div class="station"><div class="monitor"></div></div>
+      </div>
+      <div class="floor"></div>
+    </section>
+
+    <section class="main-window" id="mainWindow" aria-label="코딩 방어 게임">
+      <div class="titlebar">
+        <div class="title-name">
+          <span class="app-icon"></span>
+          <span>Reply_2012_CodePanic.exe</span>
+        </div>
+        <div class="window-controls" aria-hidden="true">
+          <span class="window-control">_</span>
+          <span class="window-control">□</span>
+          <span class="window-control close">×</span>
+        </div>
+      </div>
+
+      <div class="content">
+        <aside class="side">
+          <h1 class="brand">응답하라<br>2012</h1>
+          <p class="subtitle">학교 컴퓨터실 보안 복구 모드</p>
+
+          <div class="status-panel">
+            <div>
+              <div class="meter-label">
+                <span>침투율</span>
+                <span id="breachText">0%</span>
+              </div>
+              <div class="meter" aria-label="침투율">
+                <div class="meter-fill" id="breachFill"></div>
+              </div>
+            </div>
+
+            <div class="readout">
+              <div class="readout-item">
+                <span class="readout-label">남은 시간</span>
+                <span class="readout-value" id="timeReadout">90.0</span>
+              </div>
+              <div class="readout-item">
+                <span class="readout-label">정확도</span>
+                <span class="readout-value" id="accuracyReadout">100%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="fixed-time-card" aria-label="고정 제한 시간">
+              <span class="fixed-time-label">고정 제한 시간</span>
+              <span class="fixed-time-value">90.0s</span>
+            </div>
+            <div class="primary-actions">
+              <button class="start-btn" id="startBtn" type="button">시작</button>
+              <button class="reset-btn" id="resetBtn" type="button" title="초기화">↻</button>
+            </div>
+          </div>
+
+          <div class="popup-layer" id="popupLayer" aria-hidden="true"></div>
+
+          <div class="log" id="log" aria-live="polite"></div>
+        </aside>
+
+        <section class="stage">
+          <div class="panic-strip">
+            <div class="panic-title" id="panicTitle">해킹을 당하는 중입니다!</div>
+            <div class="panic-code" id="panicCode">TRACE 0x2012</div>
+          </div>
+
+          <div class="mission-card">
+            <span class="mission-kicker">긴급 미션</span>
+            <strong class="mission-title" id="missionTitle">방화벽을 복구하라</strong>
+            <span class="mission-detail" id="missionDetail">코드를 끝까지 입력하면 복구됩니다</span>
+          </div>
+
+          <div class="terminal-shell">
+            <div class="terminal-bar">
+              <span>C:\정보실\restore_firewall.js</span>
+              <span class="leds" aria-hidden="true">
+                <span class="led red"></span>
+                <span class="led yellow"></span>
+                <span class="led green"></span>
+              </span>
+            </div>
+            <div class="code-wrap" id="codeWrap" tabindex="0" role="textbox" aria-label="코드 입력 영역">
+              <div id="codeRender"></div>
+              <textarea class="typing-input" id="typingInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+            <div class="input-status">
+              <span id="statusLine">SYSTEM READY</span>
+              <span><strong id="typedReadout">0</strong>/<span id="totalReadout">0</span></span>
+            </div>
+          </div>
+        </section>
+
+        <div class="screen-overlay ready visible" id="overlay">
+          <div class="result-box">
+            <section class="overlay-panel login-panel" id="loginPanel">
+              <form class="login-grid" id="loginForm">
+                <h2 class="result-title">관리자 로그인</h2>
+                <p class="result-copy">정보실 보안 복구 콘솔에 접속합니다.</p>
+                <label class="login-label">
+                  ID
+                  <input class="login-field" id="loginId" autocomplete="username" value="admin">
+                </label>
+                <label class="login-label">
+                  PASSWORD
+                  <input class="login-field" id="loginPassword" type="password" autocomplete="current-password" value="admin">
+                </label>
+                <div class="login-error" id="loginError" aria-live="polite"></div>
+                <button class="overlay-action" type="submit">로그인</button>
+              </form>
+            </section>
+
+            <section class="overlay-panel ranking-panel" id="rankingPanel" hidden>
+              <div class="ranking-head">
+                <div>
+                  <h2 class="ranking-title">랭킹 보드</h2>
+                  <p class="ranking-copy">모든 참가자는 같은 코드와 90초 제한 시간으로 도전합니다. 점수는 성공 보너스 + 남은 시간 + 정확도 + 진행률입니다.</p>
+                </div>
+                <div class="ranking-actions">
+                  <label class="player-label">
+                    참가자 이름
+                    <input class="player-field" id="playerNameInput" maxlength="14" placeholder="PLAYER 01">
+                  </label>
+                  <button class="overlay-action" id="rankingStartBtn" type="button">도전 시작</button>
+                  <button class="overlay-action secondary" id="clearRankingBtn" type="button">랭킹 초기화</button>
+                </div>
+              </div>
+              <div id="rankingBoard"></div>
+            </section>
+
+            <section class="overlay-panel warning-panel" id="warningPanel" hidden>
+              <div class="warning-icon" aria-hidden="true">!</div>
+              <h2 class="warning-title">해킹이 감지됐습니다</h2>
+              <p class="warning-copy">
+                외부 침입자가 정보실 PC에 접근 중입니다.<br>
+                모두 같은 코드입니다. 90초 안에 입력해 시스템을 복구하세요.
+              </p>
+              <div class="overlay-actions">
+                <button class="overlay-action" id="confirmStartBtn" type="button">복구 시작</button>
+                <button class="overlay-action secondary" id="cancelStartBtn" type="button">취소</button>
+              </div>
+            </section>
+
+            <section class="overlay-panel result-panel" id="resultPanel" hidden>
+              <h2 class="result-title" id="resultTitle">부팅 완료</h2>
+              <p class="result-copy" id="resultCopy">시작 버튼을 누르면 보안 복구가 시작됩니다.</p>
+              <div class="score-summary" id="scoreSummary"></div>
+              <div class="overlay-actions">
+                <button class="overlay-action" id="overlayAction" type="button">다음 참가자</button>
+                <button class="overlay-action secondary" id="showRankingBtn" type="button">랭킹 보기</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="glitch" id="glitch"></div>
+
+    <footer class="taskbar">
+      <button class="start-menu" id="taskStart" type="button">start</button>
+      <div class="task-buttons">
+        <div class="task-button">Reply_2012_CodePanic.exe</div>
+        <div class="task-button">NATEON_login.dll</div>
+      </div>
+      <div class="tray">
+        <span class="network" aria-hidden="true"></span>
+        <span id="clockText">05:20 PM</span>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const snippets = [
+`bad_ips = ["211.201.2.12", "10.0.0.7"]
+
+for ip in bad_ips:
+  firewall.drop(ip)
+  print("blocked", ip)
+
+save_log("ip_block.txt")`,
+`ports = [22, 80, 443, 8080]
+blocked = 0
+
+for port in ports:
+  if is_open(port):
+    block_port(port)
+    blocked += 1
+
+print("blocked", blocked)`,
+`url = "/login"
+
+if has_attack(url):
+  block_web(url)
+  log_alert("web attack")
+else:
+  allow_web(url)
+
+save_log("web_guard.txt")`
+    ];
+
+    const missions = [
+      {
+        title: "악성 IP를 차단하라",
+        detail: "수상한 IP를 방화벽 차단 목록에 등록",
+        complete: "악성 IP 차단 완료"
+      },
+      {
+        title: "열린 포트를 잠가라",
+        detail: "22, 80, 443, 8080 포트 점검 후 차단",
+        complete: "포트 방어 완료"
+      },
+      {
+        title: "웹 공격을 기록하라",
+        detail: "로그인 페이지 공격을 차단하고 로그 저장",
+        complete: "웹 공격 차단 완료"
+      }
+    ];
+
+    const alertMessages = [
+      "외부 접속 감지: 211.201.2.12",
+      "관리자 권한이 탈취되었습니다.",
+      "NATEON.exe 응답 없음",
+      "방화벽 설정이 변경되었습니다.",
+      "USB_AUTORUN.vbs 실행 차단 실패",
+      "교무실 공유폴더 접근 시도",
+      "패킷 손실률 급상승",
+      "C 드라이브 암호화 진행 중"
+    ];
+
+    const TOTAL_TIME = 90;
+    const FIXED_SNIPPET_INDEX = 1;
+    const RANKING_STORAGE_KEY = "reply2012-codepanic-rankings";
+
+    const state = {
+      mode: "login",
+      loggedIn: false,
+      timeLeft: TOTAL_TIME,
+      startedAt: 0,
+      timerId: null,
+      popupId: null,
+      snippetIndex: 0,
+      snippet: snippets[0],
+      typed: "",
+      playerName: "",
+      keyStrokes: 0,
+      mistakes: 0,
+      inputError: false,
+      popups: 0,
+      finalResult: null,
+      audio: null
+    };
+
+    const app = document.getElementById("app");
+    const mainWindow = document.getElementById("mainWindow");
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const taskStart = document.getElementById("taskStart");
+    const overlay = document.getElementById("overlay");
+    const loginPanel = document.getElementById("loginPanel");
+    const rankingPanel = document.getElementById("rankingPanel");
+    const warningPanel = document.getElementById("warningPanel");
+    const resultPanel = document.getElementById("resultPanel");
+    const loginForm = document.getElementById("loginForm");
+    const loginId = document.getElementById("loginId");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginError = document.getElementById("loginError");
+    const rankingBoard = document.getElementById("rankingBoard");
+    const rankingStartBtn = document.getElementById("rankingStartBtn");
+    const clearRankingBtn = document.getElementById("clearRankingBtn");
+    const confirmStartBtn = document.getElementById("confirmStartBtn");
+    const cancelStartBtn = document.getElementById("cancelStartBtn");
+    const playerNameInput = document.getElementById("playerNameInput");
+    const overlayAction = document.getElementById("overlayAction");
+    const showRankingBtn = document.getElementById("showRankingBtn");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultCopy = document.getElementById("resultCopy");
+    const scoreSummary = document.getElementById("scoreSummary");
+    const codeWrap = document.getElementById("codeWrap");
+    const codeRender = document.getElementById("codeRender");
+    const typingInput = document.getElementById("typingInput");
+    const timeReadout = document.getElementById("timeReadout");
+    const accuracyReadout = document.getElementById("accuracyReadout");
+    const breachFill = document.getElementById("breachFill");
+    const breachText = document.getElementById("breachText");
+    const typedReadout = document.getElementById("typedReadout");
+    const totalReadout = document.getElementById("totalReadout");
+    const statusLine = document.getElementById("statusLine");
+    const log = document.getElementById("log");
+    const popupLayer = document.getElementById("popupLayer");
+    const glitch = document.getElementById("glitch");
+    const panicTitle = document.getElementById("panicTitle");
+    const panicCode = document.getElementById("panicCode");
+    const missionTitle = document.getElementById("missionTitle");
+    const missionDetail = document.getElementById("missionDetail");
+    const clockText = document.getElementById("clockText");
+    let rankings = loadRankings();
+
+    function boot() {
+      loadSnippet(FIXED_SNIPPET_INDEX);
+      renderCode();
+      totalReadout.textContent = String(state.snippet.length);
+      state.timeLeft = TOTAL_TIME;
+      updateStats();
+      addLog("C:\\> boot classroom security shell");
+      addLog("MODE: Reply 2012 / lab recovery");
+      updateClock();
+      setInterval(updateClock, 1000);
+      showLogin();
+    }
+
+    function requestStartGame() {
+      if (!state.loggedIn) {
+        showLogin();
+        return;
+      }
+
+      state.playerName = normalizePlayerName(playerNameInput.value);
+      playerNameInput.value = state.playerName;
+      state.mode = "warning";
+      showPanel("warning");
+      overlay.className = "screen-overlay warning visible";
+      panicTitle.textContent = "침입 경고";
+      panicCode.textContent = "INTRUSION";
+      statusLine.textContent = "WAITING CONFIRM";
+      addLog(`ALERT: intrusion detected for ${state.playerName}`);
+      flashGlitch();
+      beep(210, 0.13, "sawtooth", 0.09);
+      setTimeout(() => confirmStartBtn.focus(), 0);
+    }
+
+    function beginGame() {
+      if (!state.loggedIn) {
+        showLogin();
+        return;
+      }
+
+      state.playerName = normalizePlayerName(playerNameInput.value);
+      playerNameInput.value = state.playerName;
+      clearGameLoops();
+      state.mode = "running";
+      loadSnippet(FIXED_SNIPPET_INDEX);
+      state.typed = "";
+      state.keyStrokes = 0;
+      state.mistakes = 0;
+      state.inputError = false;
+      state.timeLeft = TOTAL_TIME;
+      state.startedAt = performance.now();
+      state.popups = 0;
+      state.finalResult = null;
+      typingInput.value = "";
+      popupLayer.innerHTML = "";
+      overlay.className = "screen-overlay";
+      startBtn.disabled = true;
+      panicTitle.textContent = "해킹을 당하는 중입니다!";
+      panicCode.textContent = "TRACE 0x2012";
+      statusLine.textContent = "TYPE TO RESTORE";
+      app.classList.remove("danger-mode");
+      renderCode();
+      updateStats();
+      addLog("WARNING: unauthorized packet stream");
+      addLog(`MISSION: ${missions[state.snippetIndex].title}`);
+      focusInput();
+      beep(440, 0.08, "square", 0.08);
+      setTimeout(() => spawnAlert("해킹을 당하는 중입니다!"), 250);
+      state.timerId = setInterval(tick, 80);
+      state.popupId = setInterval(() => {
+        if (state.mode === "running") {
+          spawnAlert();
+          flashGlitch();
+        }
+      }, 3100);
+    }
+
+    function tick() {
+      const elapsed = (performance.now() - state.startedAt) / 1000;
+      state.timeLeft = Math.max(0, TOTAL_TIME - elapsed);
+      updateStats();
+
+      if (state.timeLeft <= 10) {
+        app.classList.add("danger-mode");
+        panicCode.textContent = "LOCKDOWN " + Math.ceil(state.timeLeft).toString().padStart(2, "0");
+      }
+
+      if (state.timeLeft <= 0) {
+        failGame();
+      }
+    }
+
+    function resetGame() {
+      clearGameLoops();
+      state.mode = state.loggedIn ? "ranking" : "login";
+      state.typed = "";
+      state.keyStrokes = 0;
+      state.mistakes = 0;
+      state.inputError = false;
+      state.timeLeft = TOTAL_TIME;
+      typingInput.value = "";
+      popupLayer.innerHTML = "";
+      app.classList.remove("danger-mode");
+      startBtn.disabled = false;
+      panicTitle.textContent = "해킹을 당하는 중입니다!";
+      panicCode.textContent = "TRACE 0x2012";
+      statusLine.textContent = "SYSTEM READY";
+      updateMission();
+      renderCode();
+      updateStats();
+      addLog("C:\\> reset");
+      if (state.loggedIn) {
+        showRanking();
+      } else {
+        showLogin();
+      }
+    }
+
+    function clearGameLoops() {
+      if (state.timerId) clearInterval(state.timerId);
+      if (state.popupId) clearInterval(state.popupId);
+      state.timerId = null;
+      state.popupId = null;
+    }
+
+    function loadSnippet(index) {
+      state.snippetIndex = index;
+      state.snippet = snippets[index];
+      updateMission();
+    }
+
+    function updateMission() {
+      const mission = missions[state.snippetIndex] || missions[0];
+      missionTitle.textContent = mission.title;
+      missionDetail.textContent = mission.detail;
+    }
+
+    function showPanel(panelName) {
+      loginPanel.hidden = panelName !== "login";
+      rankingPanel.hidden = panelName !== "ranking";
+      warningPanel.hidden = panelName !== "warning";
+      resultPanel.hidden = panelName !== "result";
+    }
+
+    function showLogin() {
+      state.mode = "login";
+      clearGameLoops();
+      showPanel("login");
+      overlay.className = "screen-overlay login visible";
+      startBtn.disabled = false;
+      setTimeout(() => loginId.focus(), 0);
+    }
+
+    function showRanking() {
+      if (!state.loggedIn) {
+        showLogin();
+        return;
+      }
+
+      const fromResult = state.mode === "success" || state.mode === "fail";
+      state.mode = "ranking";
+      clearGameLoops();
+      showPanel("ranking");
+      renderRanking();
+      overlay.className = "screen-overlay ranking visible";
+      startBtn.disabled = false;
+      if (fromResult) {
+        playerNameInput.value = "";
+      }
+      setTimeout(() => playerNameInput.focus(), 0);
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const id = loginId.value.trim();
+      const password = loginPassword.value;
+
+      if (id === "admin" && password === "admin") {
+        state.loggedIn = true;
+        loginError.textContent = "";
+        addLog("AUTH: admin login accepted");
+        showRanking();
+        return;
+      }
+
+      loginError.textContent = "ID 또는 PASSWORD가 올바르지 않습니다.";
+      addLog("AUTH: login rejected");
+      beep(120, 0.12, "sawtooth", 0.08);
+    }
+
+    function normalizePlayerName(name) {
+      const cleaned = name.trim().replace(/\s+/g, " ");
+      if (cleaned) return cleaned.slice(0, 14);
+      return `PLAYER ${String(rankings.length + 1).padStart(2, "0")}`;
+    }
+
+    function loadRankings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(RANKING_STORAGE_KEY) || "[]");
+        if (!Array.isArray(saved)) return [];
+        return saved
+          .filter((entry) => entry && typeof entry === "object")
+          .map((entry) => ({
+            id: Number(entry.id) || Date.now(),
+            name: String(entry.name || "PLAYER"),
+            score: Number(entry.score) || 0,
+            success: Boolean(entry.success),
+            remaining: Number(entry.remaining) || 0,
+            elapsed: Number(entry.elapsed) || TOTAL_TIME,
+            accuracy: Number(entry.accuracy) || 0,
+            progress: Number(entry.progress) || 0,
+            mission: String(entry.mission || "복구 미션"),
+            createdAt: String(entry.createdAt || new Date().toISOString())
+          }));
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveRankings() {
+      rankings.sort(sortRanking);
+      rankings = rankings.slice(0, 50);
+      try {
+        localStorage.setItem(RANKING_STORAGE_KEY, JSON.stringify(rankings));
+      } catch (error) {
+        addLog("WARN: ranking save failed");
+      }
+    }
+
+    function sortRanking(a, b) {
+      return b.score - a.score ||
+        b.accuracy - a.accuracy ||
+        b.remaining - a.remaining ||
+        b.progress - a.progress;
+    }
+
+    function renderRanking() {
+      rankings.sort(sortRanking);
+
+      if (rankings.length === 0) {
+        rankingBoard.innerHTML = '<p class="ranking-empty">아직 기록이 없습니다. 첫 참가자를 등록하고 도전을 시작하세요.</p>';
+        return;
+      }
+
+      const rows = rankings.slice(0, 10).map((entry, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(entry.name)}</td>
+          <td>${entry.score}</td>
+          <td>${entry.remaining.toFixed(1)}s</td>
+          <td>${entry.accuracy}%</td>
+          <td>${entry.success ? "복구" : "실패"}</td>
+        </tr>
+      `).join("");
+
+      rankingBoard.innerHTML = `
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>참가자</th>
+              <th>점수</th>
+              <th>남은 시간</th>
+              <th>정확도</th>
+              <th>결과</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function finalizeAttempt(success) {
+      const accuracy = state.keyStrokes === 0 ? 0 : getAccuracy();
+      const progress = getProgress();
+      const remaining = success ? Number(state.timeLeft.toFixed(1)) : 0;
+      const elapsed = Number((TOTAL_TIME - state.timeLeft).toFixed(1));
+      const score = calculateScore({ success, accuracy, progress, remaining });
+      const result = {
+        id: Date.now(),
+        name: state.playerName,
+        score,
+        success,
+        remaining,
+        elapsed,
+        accuracy,
+        progress,
+        mission: missions[state.snippetIndex].title,
+        createdAt: new Date().toISOString()
+      };
+
+      state.finalResult = result;
+      rankings.push(result);
+      saveRankings();
+      return result;
+    }
+
+    function calculateScore(result) {
+      const successBonus = result.success ? 10000 : 0;
+      const timeScore = Math.round(result.remaining * 100);
+      const accuracyScore = Math.round(result.accuracy * 50);
+      const progressScore = Math.round(result.progress * 30);
+      return successBonus + timeScore + accuracyScore + progressScore;
+    }
+
+    function getProgress() {
+      if (!state.snippet.length) return 0;
+      return Math.round((state.typed.length / state.snippet.length) * 100);
+    }
+
+    function renderResult(result) {
+      const rankIndex = rankings.findIndex((entry) => entry.id === result.id) + 1;
+      const grade = getGrade(result);
+      showPanel("result");
+      overlay.className = `screen-overlay ${result.success ? "success" : "fail"} visible`;
+      resultTitle.textContent = result.success ? "복구 성공" : "SYSTEM LOCKED";
+      resultCopy.textContent = result.success
+        ? `RANK ${rankIndex} · GRADE ${grade} · ${result.mission}`
+        : `RANK ${rankIndex} · STOP: 0x00002012  TIME_LIMIT_EXCEEDED`;
+      overlayAction.textContent = "다음 참가자";
+      scoreSummary.innerHTML = `
+        <div class="score-chip"><span>점수</span><strong>${result.score}</strong></div>
+        <div class="score-chip"><span>남은 시간</span><strong>${result.remaining.toFixed(1)}s</strong></div>
+        <div class="score-chip"><span>정확도</span><strong>${result.accuracy}%</strong></div>
+        <div class="score-chip"><span>진행률</span><strong>${result.progress}%</strong></div>
+      `;
+    }
+
+    function getGrade(result) {
+      if (!result.success) return "F";
+      if (result.score >= 22000) return "S";
+      if (result.score >= 18500) return "A";
+      if (result.score >= 15000) return "B";
+      return "C";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function successGame() {
+      if (state.mode !== "running") return;
+      state.mode = "success";
+      clearGameLoops();
+      startBtn.disabled = false;
+      app.classList.remove("danger-mode");
+      const result = finalizeAttempt(true);
+      renderResult(result);
+      panicTitle.textContent = missions[state.snippetIndex].complete;
+      panicCode.textContent = "ACCESS DENIED";
+      statusLine.textContent = "SYSTEM SECURED";
+      addLog("SUCCESS: firewall restored");
+      addLog(`RESULT: score ${result.score}, acc ${result.accuracy}%`);
+      beep(523, 0.08, "square", 0.08);
+      setTimeout(() => beep(659, 0.08, "square", 0.08), 90);
+      setTimeout(() => beep(784, 0.12, "square", 0.08), 180);
+    }
+
+    function failGame() {
+      if (state.mode !== "running") return;
+      state.mode = "fail";
+      clearGameLoops();
+      startBtn.disabled = false;
+      const result = finalizeAttempt(false);
+      renderResult(result);
+      panicTitle.textContent = "복구 실패";
+      panicCode.textContent = "BLUE SCREEN";
+      statusLine.textContent = "FAILED";
+      addLog(`FAIL: timeout, score ${result.score}`);
+      flashGlitch();
+      mainWindow.classList.add("shake");
+      setTimeout(() => mainWindow.classList.remove("shake"), 270);
+      beep(160, 0.18, "sawtooth", 0.1);
+      setTimeout(() => beep(90, 0.22, "sawtooth", 0.09), 160);
+    }
+
+    function handleTyping() {
+      if (state.mode !== "running") {
+        typingInput.value = state.typed;
+        return;
+      }
+
+      const nextTyped = typingInput.value.slice(0, state.snippet.length);
+
+      if (nextTyped.length < state.typed.length) {
+        state.typed = nextTyped;
+        updateTypingState();
+        return;
+      }
+
+      for (let i = state.typed.length; i < nextTyped.length; i += 1) {
+        commitTypedChar(nextTyped[i], { skipInputSync: true });
+      }
+      typingInput.value = state.typed;
+    }
+
+    function commitTypedChar(char, options = {}) {
+      if (state.mode !== "running" || state.typed.length >= state.snippet.length) return;
+
+      const expected = state.snippet[state.typed.length];
+      state.keyStrokes += 1;
+      if (char !== expected) {
+        state.mistakes += 1;
+        state.inputError = true;
+        typingInput.value = state.typed;
+        statusLine.textContent = `RETRY ${formatChar(expected)}`;
+        renderCode();
+        updateStats();
+        return;
+      }
+
+      state.inputError = false;
+      state.typed += expected;
+      if (!options.skipInputSync) {
+        typingInput.value = state.typed;
+      }
+      updateTypingState();
+    }
+
+    function deleteTypedChar() {
+      if (state.mode !== "running" || state.typed.length === 0) return;
+      state.inputError = false;
+      state.typed = state.typed.slice(0, -1);
+      typingInput.value = state.typed;
+      updateTypingState();
+    }
+
+    function insertTabIndent() {
+      if (state.mode !== "running") return;
+
+      if (state.snippet[state.typed.length] !== " ") {
+        commitTypedChar("\t");
+        return;
+      }
+
+      let inserted = 0;
+      while (state.snippet[state.typed.length] === " " && inserted < 2) {
+        commitTypedChar(" ");
+        inserted += 1;
+      }
+    }
+
+    function updateTypingState() {
+      statusLine.textContent = "TYPE TO RESTORE";
+
+      renderCode();
+      updateStats();
+      scrollCursorIntoView();
+
+      if (state.typed === state.snippet) {
+        successGame();
+      }
+    }
+
+    function formatChar(char) {
+      if (char === " ") return "SPACE";
+      if (char === "\n") return "ENTER";
+      if (char === "\t") return "TAB";
+      return `"${char}"`;
+    }
+
+    function scrollCursorIntoView() {
+      const cursor = codeRender.querySelector(".typing-caret");
+      if (cursor) {
+        cursor.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+    }
+
+    function createCaret() {
+      const caret = document.createElement("span");
+      caret.className = "typing-caret";
+      if (state.inputError) {
+        caret.classList.add("input-error");
+      }
+      caret.setAttribute("aria-hidden", "true");
+      return caret;
+    }
+
+    function renderCode() {
+      const target = state.snippet;
+      codeRender.innerHTML = "";
+      let line = document.createElement("div");
+      line.className = "code-line";
+      codeRender.appendChild(line);
+
+      for (let index = 0; index < target.length; index += 1) {
+        const char = target[index];
+
+        if (index === state.typed.length && state.mode === "running") {
+          line.appendChild(createCaret());
+        }
+
+        if (char === "\n") {
+          const span = document.createElement("span");
+          span.className = "ch newline";
+          span.textContent = "↵";
+
+          if (index < state.typed.length) {
+            span.classList.add("correct");
+          } else {
+            span.classList.add("pending");
+          }
+
+          line.appendChild(span);
+          line = document.createElement("div");
+          line.className = "code-line";
+          codeRender.appendChild(line);
+          continue;
+        }
+
+        const span = document.createElement("span");
+        span.className = "ch";
+        if (char === " ") span.classList.add("space");
+        span.textContent = char === " " ? "\u00a0" : char;
+
+        if (index < state.typed.length) {
+          span.classList.add(state.typed[index] === char ? "correct" : "wrong");
+        } else {
+          span.classList.add("pending");
+        }
+
+        line.appendChild(span);
+      }
+
+      if (state.typed.length === target.length && state.mode === "running") {
+        line.appendChild(createCaret());
+      }
+    }
+
+    function updateStats() {
+      const progress = state.snippet.length ? state.typed.length / state.snippet.length : 0;
+      const timePressure = 1 - state.timeLeft / TOTAL_TIME;
+      const breach = Math.min(100, Math.max(0, Math.round(timePressure * 82 + state.mistakes * 5 - progress * 34)));
+      const accuracy = getAccuracy();
+
+      timeReadout.textContent = state.timeLeft.toFixed(1);
+      accuracyReadout.textContent = `${accuracy}%`;
+      breachFill.style.width = `${breach}%`;
+      breachText.textContent = `${breach}%`;
+      typedReadout.textContent = String(state.typed.length);
+      totalReadout.textContent = String(state.snippet.length);
+    }
+
+    function countWrong() {
+      let wrong = 0;
+      for (let i = 0; i < state.typed.length; i += 1) {
+        if (state.typed[i] !== state.snippet[i]) wrong += 1;
+      }
+      return wrong;
+    }
+
+    function getAccuracy() {
+      if (state.keyStrokes === 0) return 100;
+      const right = state.keyStrokes - state.mistakes;
+      return Math.max(0, Math.round((right / state.keyStrokes) * 100));
+    }
+
+    function spawnAlert(forcedMessage) {
+      if (state.mode !== "running") return;
+      const alert = document.createElement("div");
+      alert.className = "alert-window";
+      const message = forcedMessage || alertMessages[Math.floor(Math.random() * alertMessages.length)];
+      alert.innerHTML = `
+        <div class="alert-title">
+          <span>Security Center</span>
+          <span class="alert-close">×</span>
+        </div>
+        <div class="alert-body">
+          <div class="alert-symbol">!</div>
+          <div>${message}</div>
+        </div>
+      `;
+      popupLayer.appendChild(alert);
+      state.popups += 1;
+      addLog(`ALERT: ${message}`);
+      if (popupLayer.children.length > 3) {
+        popupLayer.children[0].remove();
+      }
+      beep(720 - Math.min(state.popups, 5) * 60, 0.045, "square", 0.045);
+    }
+
+    function flashGlitch() {
+      glitch.classList.remove("active");
+      void glitch.offsetWidth;
+      glitch.classList.add("active");
+    }
+
+    function focusInput() {
+      codeWrap.focus();
+      typingInput.focus();
+    }
+
+    function addLog(text) {
+      const line = document.createElement("div");
+      line.textContent = `> ${text}`;
+      log.appendChild(line);
+      while (log.children.length > 8) {
+        log.children[0].remove();
+      }
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function beep(freq, duration, type, gain) {
+      try {
+        if (!state.audio) {
+          state.audio = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const oscillator = state.audio.createOscillator();
+        const volume = state.audio.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = freq;
+        volume.gain.setValueAtTime(gain, state.audio.currentTime);
+        volume.gain.exponentialRampToValueAtTime(0.001, state.audio.currentTime + duration);
+        oscillator.connect(volume);
+        volume.connect(state.audio.destination);
+        oscillator.start();
+        oscillator.stop(state.audio.currentTime + duration);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      const label = hours >= 12 ? "PM" : "AM";
+      const twelve = hours % 12 || 12;
+      clockText.textContent = `${twelve.toString().padStart(2, "0")}:${minutes} ${label}`;
+    }
+
+    function handleGlobalKeydown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        resetGame();
+        return;
+      }
+
+      if (state.mode === "running") {
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        const printableKey = getPrintableKey(event);
+
+        if (event.key === "Backspace") {
+          event.preventDefault();
+          focusInput();
+          deleteTypedChar();
+          return;
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          focusInput();
+          commitTypedChar("\n");
+          return;
+        }
+
+        if (event.key === "Tab") {
+          event.preventDefault();
+          focusInput();
+          insertTabIndent();
+          return;
+        }
+
+        if (printableKey) {
+          event.preventDefault();
+          focusInput();
+          commitTypedChar(printableKey);
+          return;
+        }
+
+        focusInput();
+        return;
+      }
+
+      if (event.key === "Enter" && state.mode === "ranking") {
+        event.preventDefault();
+        requestStartGame();
+        return;
+      }
+
+      if (event.key === "Enter" && state.mode === "warning") {
+        event.preventDefault();
+        beginGame();
+        return;
+      }
+
+      if (event.key === "Enter" && (state.mode === "success" || state.mode === "fail")) {
+        event.preventDefault();
+        showRanking();
+      }
+    }
+
+    function getPrintableKey(event) {
+      const lowerLetters = {
+        KeyA: "a", KeyB: "b", KeyC: "c", KeyD: "d", KeyE: "e", KeyF: "f",
+        KeyG: "g", KeyH: "h", KeyI: "i", KeyJ: "j", KeyK: "k", KeyL: "l",
+        KeyM: "m", KeyN: "n", KeyO: "o", KeyP: "p", KeyQ: "q", KeyR: "r",
+        KeyS: "s", KeyT: "t", KeyU: "u", KeyV: "v", KeyW: "w", KeyX: "x",
+        KeyY: "y", KeyZ: "z"
+      };
+      const digits = {
+        Digit0: ["0", ")"], Digit1: ["1", "!"], Digit2: ["2", "@"],
+        Digit3: ["3", "#"], Digit4: ["4", "$"], Digit5: ["5", "%"],
+        Digit6: ["6", "^"], Digit7: ["7", "&"], Digit8: ["8", "*"],
+        Digit9: ["9", "("]
+      };
+      const marks = {
+        Space: [" ", " "],
+        Minus: ["-", "_"],
+        Equal: ["=", "+"],
+        BracketLeft: ["[", "{"],
+        BracketRight: ["]", "}"],
+        Backslash: ["\\", "|"],
+        Semicolon: [";", ":"],
+        Quote: ["'", "\""],
+        Comma: [",", "<"],
+        Period: [".", ">"],
+        Slash: ["/", "?"],
+        Backquote: ["`", "~"]
+      };
+
+      if (lowerLetters[event.code]) {
+        const letter = lowerLetters[event.code];
+        return event.shiftKey ? letter.toUpperCase() : letter;
+      }
+
+      if (digits[event.code]) {
+        return digits[event.code][event.shiftKey ? 1 : 0];
+      }
+
+      if (marks[event.code]) {
+        return marks[event.code][event.shiftKey ? 1 : 0];
+      }
+
+      return event.key.length === 1 ? event.key : "";
+    }
+
+    loginForm.addEventListener("submit", handleLogin);
+    rankingStartBtn.addEventListener("click", requestStartGame);
+    clearRankingBtn.addEventListener("click", () => {
+      if (!window.confirm("랭킹 기록을 모두 삭제할까요?")) return;
+      rankings = [];
+      saveRankings();
+      renderRanking();
+      addLog("RANKING: cleared");
+    });
+    confirmStartBtn.addEventListener("click", beginGame);
+    cancelStartBtn.addEventListener("click", showRanking);
+    startBtn.addEventListener("click", requestStartGame);
+    taskStart.addEventListener("click", requestStartGame);
+    overlayAction.addEventListener("click", () => {
+      showRanking();
+    });
+    showRankingBtn.addEventListener("click", showRanking);
+    resetBtn.addEventListener("click", resetGame);
+    codeWrap.addEventListener("click", focusInput);
+    typingInput.addEventListener("input", handleTyping);
+    typingInput.addEventListener("paste", (event) => event.preventDefault());
+    document.addEventListener("keydown", handleGlobalKeydown);
+
+    boot();
+  </script>
+</body>
+</html>
