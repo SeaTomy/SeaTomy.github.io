@@ -809,7 +809,6 @@
         linear-gradient(135deg, #1149bc, #0a1f63);
     }
 
-    .screen-overlay.login .result-box,
     .screen-overlay.ranking .result-box {
       color: #14233a;
       text-align: left;
@@ -859,14 +858,6 @@
       display: none;
     }
 
-    .login-grid {
-      display: grid;
-      gap: 12px;
-      width: min(360px, 100%);
-      margin: 0 auto;
-    }
-
-    .login-label,
     .player-label {
       display: grid;
       gap: 5px;
@@ -875,7 +866,6 @@
       font-weight: 700;
     }
 
-    .login-field,
     .player-field {
       width: 100%;
       min-height: 40px;
@@ -886,13 +876,6 @@
       background: #fff;
       box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.18);
       font-family: var(--mono);
-    }
-
-    .login-error {
-      min-height: 18px;
-      color: #b10a1a;
-      font-size: 12px;
-      font-weight: 700;
     }
 
     .warning-panel {
@@ -933,10 +916,6 @@
     }
 
     .ranking-head {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
-      gap: 16px;
-      align-items: end;
       margin-bottom: 18px;
     }
 
@@ -956,9 +935,22 @@
       line-height: 1.45;
     }
 
-    .ranking-actions {
+    .ranking-controls {
       display: grid;
-      gap: 8px;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .player-start-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(140px, 190px);
+      gap: 10px;
+      align-content: start;
+      align-items: end;
+      min-width: 0;
+      padding: 0;
     }
 
     .ranking-table {
@@ -1228,6 +1220,17 @@
       text-overflow: ellipsis;
     }
 
+    #clearRankingBtn {
+      justify-content: center;
+      width: 78px;
+      opacity: 0.48;
+    }
+
+    #clearRankingBtn:hover,
+    #clearRankingBtn:focus-visible {
+      opacity: 0.95;
+    }
+
     .tray {
       height: 100%;
       display: flex;
@@ -1319,7 +1322,8 @@
         align-items: center;
       }
 
-      .ranking-head {
+      .ranking-controls,
+      .player-start-panel {
         grid-template-columns: 1fr;
       }
 
@@ -1532,37 +1536,21 @@
 
         <div class="screen-overlay ready visible" id="overlay">
           <div class="result-box">
-            <section class="overlay-panel login-panel" id="loginPanel">
-              <form class="login-grid" id="loginForm">
-                <h2 class="result-title">관리자 로그인</h2>
-                <p class="result-copy">정보실 보안 복구 콘솔에 접속합니다.</p>
-                <label class="login-label">
-                  ID
-                  <input class="login-field" id="loginId" autocomplete="username" value="admin">
-                </label>
-                <label class="login-label">
-                  PASSWORD
-                  <input class="login-field" id="loginPassword" type="password" autocomplete="current-password" value="admin">
-                </label>
-                <div class="login-error" id="loginError" aria-live="polite"></div>
-                <button class="overlay-action" type="submit">로그인</button>
-              </form>
-            </section>
-
-            <section class="overlay-panel ranking-panel" id="rankingPanel" hidden>
+            <section class="overlay-panel ranking-panel" id="rankingPanel">
               <div class="ranking-head">
                 <div>
                   <h2 class="ranking-title">랭킹 보드</h2>
                   <p class="ranking-copy">모든 참가자는 같은 코드와 90초 제한 시간으로 도전합니다. 점수는 성공 보너스 + 남은 시간 + 정확도 + 진행률입니다.</p>
                 </div>
-                <div class="ranking-actions">
+              </div>
+              <div class="ranking-controls">
+                <form class="player-start-panel" id="playerStartForm">
                   <label class="player-label">
                     참가자 이름
                     <input class="player-field" id="playerNameInput" maxlength="14" placeholder="PLAYER 01">
                   </label>
-                  <button class="overlay-action" id="rankingStartBtn" type="button">도전 시작</button>
-                  <button class="overlay-action secondary" id="clearRankingBtn" type="button">랭킹 초기화</button>
-                </div>
+                  <button class="overlay-action" id="rankingStartBtn" type="submit">도전 시작</button>
+                </form>
               </div>
               <div id="rankingBoard"></div>
             </section>
@@ -1600,7 +1588,7 @@
       <button class="start-menu" id="taskStart" type="button">start</button>
       <div class="task-buttons">
         <div class="task-button">Reply_2012_CodePanic.exe</div>
-        <div class="task-button">NATEON_login.dll</div>
+        <button class="task-button - NATEON_login.dll" id="clearRankingBtn" type="button">초기화</button>
       </div>
       <div class="tray">
         <span class="network" aria-hidden="true"></span>
@@ -1672,8 +1660,7 @@ save_log("web_guard.txt")`
     const RANKING_STORAGE_KEY = "reply2012-codepanic-rankings";
 
     const state = {
-      mode: "login",
-      loggedIn: false,
+      mode: "ranking",
       timeLeft: TOTAL_TIME,
       startedAt: 0,
       timerId: null,
@@ -1696,16 +1683,11 @@ save_log("web_guard.txt")`
     const resetBtn = document.getElementById("resetBtn");
     const taskStart = document.getElementById("taskStart");
     const overlay = document.getElementById("overlay");
-    const loginPanel = document.getElementById("loginPanel");
     const rankingPanel = document.getElementById("rankingPanel");
     const warningPanel = document.getElementById("warningPanel");
     const resultPanel = document.getElementById("resultPanel");
-    const loginForm = document.getElementById("loginForm");
-    const loginId = document.getElementById("loginId");
-    const loginPassword = document.getElementById("loginPassword");
-    const loginError = document.getElementById("loginError");
+    const playerStartForm = document.getElementById("playerStartForm");
     const rankingBoard = document.getElementById("rankingBoard");
-    const rankingStartBtn = document.getElementById("rankingStartBtn");
     const clearRankingBtn = document.getElementById("clearRankingBtn");
     const confirmStartBtn = document.getElementById("confirmStartBtn");
     const cancelStartBtn = document.getElementById("cancelStartBtn");
@@ -1745,13 +1727,12 @@ save_log("web_guard.txt")`
       addLog("MODE: Reply 2012 / lab recovery");
       updateClock();
       setInterval(updateClock, 1000);
-      showLogin();
+      showRanking();
     }
 
-    function requestStartGame() {
-      if (!state.loggedIn) {
-        showLogin();
-        return;
+    function requestStartGame(event) {
+      if (event) {
+        event.preventDefault();
       }
 
       state.playerName = normalizePlayerName(playerNameInput.value);
@@ -1769,11 +1750,6 @@ save_log("web_guard.txt")`
     }
 
     function beginGame() {
-      if (!state.loggedIn) {
-        showLogin();
-        return;
-      }
-
       state.playerName = normalizePlayerName(playerNameInput.value);
       playerNameInput.value = state.playerName;
       clearGameLoops();
@@ -1828,7 +1804,7 @@ save_log("web_guard.txt")`
 
     function resetGame() {
       clearGameLoops();
-      state.mode = state.loggedIn ? "ranking" : "login";
+      state.mode = "ranking";
       state.typed = "";
       state.keyStrokes = 0;
       state.mistakes = 0;
@@ -1845,11 +1821,7 @@ save_log("web_guard.txt")`
       renderCode();
       updateStats();
       addLog("C:\\> reset");
-      if (state.loggedIn) {
-        showRanking();
-      } else {
-        showLogin();
-      }
+      showRanking();
     }
 
     function clearGameLoops() {
@@ -1872,27 +1844,12 @@ save_log("web_guard.txt")`
     }
 
     function showPanel(panelName) {
-      loginPanel.hidden = panelName !== "login";
       rankingPanel.hidden = panelName !== "ranking";
       warningPanel.hidden = panelName !== "warning";
       resultPanel.hidden = panelName !== "result";
     }
 
-    function showLogin() {
-      state.mode = "login";
-      clearGameLoops();
-      showPanel("login");
-      overlay.className = "screen-overlay login visible";
-      startBtn.disabled = false;
-      setTimeout(() => loginId.focus(), 0);
-    }
-
     function showRanking() {
-      if (!state.loggedIn) {
-        showLogin();
-        return;
-      }
-
       const fromResult = state.mode === "success" || state.mode === "fail";
       state.mode = "ranking";
       clearGameLoops();
@@ -1906,22 +1863,14 @@ save_log("web_guard.txt")`
       setTimeout(() => playerNameInput.focus(), 0);
     }
 
-    function handleLogin(event) {
+    function handleClearRanking(event) {
       event.preventDefault();
-      const id = loginId.value.trim();
-      const password = loginPassword.value;
 
-      if (id === "admin" && password === "admin") {
-        state.loggedIn = true;
-        loginError.textContent = "";
-        addLog("AUTH: admin login accepted");
-        showRanking();
-        return;
-      }
-
-      loginError.textContent = "ID 또는 PASSWORD가 올바르지 않습니다.";
-      addLog("AUTH: login rejected");
-      beep(120, 0.12, "sawtooth", 0.08);
+      if (!window.confirm("랭킹 기록을 모두 삭제할까요?")) return;
+      rankings = [];
+      saveRankings();
+      renderRanking();
+      addLog("RANKING: cleared");
     }
 
     function normalizePlayerName(name) {
@@ -2476,15 +2425,8 @@ save_log("web_guard.txt")`
       return event.key.length === 1 ? event.key : "";
     }
 
-    loginForm.addEventListener("submit", handleLogin);
-    rankingStartBtn.addEventListener("click", requestStartGame);
-    clearRankingBtn.addEventListener("click", () => {
-      if (!window.confirm("랭킹 기록을 모두 삭제할까요?")) return;
-      rankings = [];
-      saveRankings();
-      renderRanking();
-      addLog("RANKING: cleared");
-    });
+    playerStartForm.addEventListener("submit", requestStartGame);
+    clearRankingBtn.addEventListener("click", handleClearRanking);
     confirmStartBtn.addEventListener("click", beginGame);
     cancelStartBtn.addEventListener("click", showRanking);
     startBtn.addEventListener("click", requestStartGame);
