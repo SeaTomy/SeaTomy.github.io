@@ -1067,6 +1067,7 @@
     .alert-window {
       position: relative;
       width: 100%;
+      overflow: hidden;
       border: 2px solid #1046ad;
       border-radius: 7px 7px 0 0;
       background: #eeeedf;
@@ -1094,7 +1095,15 @@
       text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.42);
     }
 
+    .alert-title span:first-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .alert-close {
+      flex: 0 0 auto;
       width: 18px;
       height: 18px;
       border-radius: 3px;
@@ -1112,6 +1121,12 @@
       padding: 13px 12px 14px;
       color: #1b293e;
       font-size: 13px;
+    }
+
+    .alert-message {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
     }
 
     .alert-symbol {
@@ -1534,7 +1549,7 @@
           </div>
         </section>
 
-        <div class="screen-overlay ready visible" id="overlay">
+        <div class="screen-overlay ranking visible" id="overlay">
           <div class="result-box">
             <section class="overlay-panel ranking-panel" id="rankingPanel">
               <div class="ranking-head">
@@ -1658,6 +1673,10 @@ save_log("web_guard.txt")`
     const TOTAL_TIME = 90;
     const FIXED_SNIPPET_INDEX = 1;
     const RANKING_STORAGE_KEY = "reply2012-codepanic-rankings";
+    const BREACH_LIMIT = 100;
+    const BREACH_TIME_WEIGHT = 82;
+    const BREACH_MISTAKE_PENALTY = 6;
+    const BREACH_PROGRESS_RECOVERY = 34;
 
     const state = {
       mode: "ranking",
@@ -1674,7 +1693,8 @@ save_log("web_guard.txt")`
       inputError: false,
       popups: 0,
       finalResult: null,
-      audio: null
+      audio: null,
+      composingInput: false
     };
 
     const app = document.getElementById("app");
@@ -1790,7 +1810,12 @@ save_log("web_guard.txt")`
     function tick() {
       const elapsed = (performance.now() - state.startedAt) / 1000;
       state.timeLeft = Math.max(0, TOTAL_TIME - elapsed);
-      updateStats();
+      const breach = updateStats();
+
+      if (breach >= BREACH_LIMIT) {
+        failGame("BREACH_LIMIT_REACHED");
+        return;
+      }
 
       if (state.timeLeft <= 10) {
         app.classList.add("danger-mode");
@@ -1798,7 +1823,7 @@ save_log("web_guard.txt")`
       }
 
       if (state.timeLeft <= 0) {
-        failGame();
+        failGame("TIME_LIMIT_EXCEEDED");
       }
     }
 
@@ -1955,7 +1980,7 @@ save_log("web_guard.txt")`
       `;
     }
 
-    function finalizeAttempt(success) {
+    function finalizeAttempt(success, reason = "") {
       const accuracy = state.keyStrokes === 0 ? 0 : getAccuracy();
       const progress = getProgress();
       const remaining = success ? Number(state.timeLeft.toFixed(1)) : 0;
@@ -1971,6 +1996,7 @@ save_log("web_guard.txt")`
         accuracy,
         progress,
         mission: missions[state.snippetIndex].title,
+        reason,
         createdAt: new Date().toISOString()
       };
 
@@ -2001,7 +2027,7 @@ save_log("web_guard.txt")`
       resultTitle.textContent = result.success ? "복구 성공" : "SYSTEM LOCKED";
       resultCopy.textContent = result.success
         ? `RANK ${rankIndex} · GRADE ${grade} · ${result.mission}`
-        : `RANK ${rankIndex} · STOP: 0x00002012  TIME_LIMIT_EXCEEDED`;
+        : `RANK ${rankIndex} · STOP: 0x00002012  ${result.reason || "TIME_LIMIT_EXCEEDED"}`;
       overlayAction.textContent = "다음 참가자";
       scoreSummary.innerHTML = `
         <div class="score-chip"><span>점수</span><strong>${result.score}</strong></div>
@@ -2046,17 +2072,17 @@ save_log("web_guard.txt")`
       setTimeout(() => beep(784, 0.12, "square", 0.08), 180);
     }
 
-    function failGame() {
+    function failGame(reason = "TIME_LIMIT_EXCEEDED") {
       if (state.mode !== "running") return;
       state.mode = "fail";
       clearGameLoops();
       startBtn.disabled = false;
-      const result = finalizeAttempt(false);
+      const result = finalizeAttempt(false, reason);
       renderResult(result);
       panicTitle.textContent = "복구 실패";
       panicCode.textContent = "BLUE SCREEN";
       statusLine.textContent = "FAILED";
-      addLog(`FAIL: timeout, score ${result.score}`);
+      addLog(`FAIL: ${reason}, score ${result.score}`);
       flashGlitch();
       mainWindow.classList.add("shake");
       setTimeout(() => mainWindow.classList.remove("shake"), 270);
@@ -2064,8 +2090,13 @@ save_log("web_guard.txt")`
       setTimeout(() => beep(90, 0.22, "sawtooth", 0.09), 160);
     }
 
-    function handleTyping() {
+    function handleTyping(event) {
       if (state.mode !== "running") {
+        typingInput.value = state.typed;
+        return;
+      }
+
+      if (state.composingInput || event?.isComposing) {
         typingInput.value = state.typed;
         return;
       }
@@ -2079,6 +2110,10 @@ save_log("web_guard.txt")`
       }
 
       for (let i = state.typed.length; i < nextTyped.length; i += 1) {
+        if (shouldIgnoreInputChar(nextTyped[i])) {
+          typingInput.value = state.typed;
+          return;
+        }
         commitTypedChar(nextTyped[i], { skipInputSync: true });
       }
       typingInput.value = state.typed;
@@ -2086,6 +2121,10 @@ save_log("web_guard.txt")`
 
     function commitTypedChar(char, options = {}) {
       if (state.mode !== "running" || state.typed.length >= state.snippet.length) return;
+      if (shouldIgnoreInputChar(char)) {
+        typingInput.value = state.typed;
+        return;
+      }
 
       const expected = state.snippet[state.typed.length];
       state.keyStrokes += 1;
@@ -2095,7 +2134,9 @@ save_log("web_guard.txt")`
         typingInput.value = state.typed;
         statusLine.textContent = `RETRY ${formatChar(expected)}`;
         renderCode();
-        updateStats();
+        if (updateStats() >= BREACH_LIMIT) {
+          failGame("BREACH_LIMIT_REACHED");
+        }
         return;
       }
 
@@ -2220,7 +2261,11 @@ save_log("web_guard.txt")`
     function updateStats() {
       const progress = state.snippet.length ? state.typed.length / state.snippet.length : 0;
       const timePressure = 1 - state.timeLeft / TOTAL_TIME;
-      const breach = Math.min(100, Math.max(0, Math.round(timePressure * 82 + state.mistakes * 5 - progress * 34)));
+      const breach = Math.min(BREACH_LIMIT, Math.max(0, Math.round(
+        timePressure * BREACH_TIME_WEIGHT +
+        state.mistakes * BREACH_MISTAKE_PENALTY -
+        progress * BREACH_PROGRESS_RECOVERY
+      )));
       const accuracy = getAccuracy();
 
       timeReadout.textContent = state.timeLeft.toFixed(1);
@@ -2229,6 +2274,7 @@ save_log("web_guard.txt")`
       breachText.textContent = `${breach}%`;
       typedReadout.textContent = String(state.typed.length);
       totalReadout.textContent = String(state.snippet.length);
+      return breach;
     }
 
     function countWrong() {
@@ -2257,7 +2303,7 @@ save_log("web_guard.txt")`
         </div>
         <div class="alert-body">
           <div class="alert-symbol">!</div>
-          <div>${message}</div>
+          <div class="alert-message">${message}</div>
         </div>
       `;
       popupLayer.appendChild(alert);
@@ -2319,6 +2365,18 @@ save_log("web_guard.txt")`
       clockText.textContent = `${twelve.toString().padStart(2, "0")}:${minutes} ${label}`;
     }
 
+    function containsHangul(value) {
+      return /[\u3131-\u318e\uac00-\ud7a3]/.test(value);
+    }
+
+    function shouldIgnoreInputChar(char) {
+      return typeof char === "string" && containsHangul(char);
+    }
+
+    function isImeKeyEvent(event) {
+      return event.isComposing || event.key === "Process" || containsHangul(event.key);
+    }
+
     function handleGlobalKeydown(event) {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -2328,6 +2386,11 @@ save_log("web_guard.txt")`
 
       if (state.mode === "running") {
         if (event.ctrlKey || event.metaKey || event.altKey) return;
+        if (isImeKeyEvent(event)) {
+          typingInput.value = state.typed;
+          focusInput();
+          return;
+        }
         const printableKey = getPrintableKey(event);
 
         if (event.key === "Backspace") {
@@ -2381,6 +2444,8 @@ save_log("web_guard.txt")`
     }
 
     function getPrintableKey(event) {
+      if (isImeKeyEvent(event)) return "";
+
       const lowerLetters = {
         KeyA: "a", KeyB: "b", KeyC: "c", KeyD: "d", KeyE: "e", KeyF: "f",
         KeyG: "g", KeyH: "h", KeyI: "i", KeyJ: "j", KeyK: "k", KeyL: "l",
@@ -2438,6 +2503,13 @@ save_log("web_guard.txt")`
     resetBtn.addEventListener("click", resetGame);
     codeWrap.addEventListener("click", focusInput);
     typingInput.addEventListener("input", handleTyping);
+    typingInput.addEventListener("compositionstart", () => {
+      state.composingInput = true;
+    });
+    typingInput.addEventListener("compositionend", () => {
+      state.composingInput = false;
+      typingInput.value = state.typed;
+    });
     typingInput.addEventListener("paste", (event) => event.preventDefault());
     document.addEventListener("keydown", handleGlobalKeydown);
 
