@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reply 2012: Code Panic Booth</title>
+  <title>Reply 2012: Click Panic Booth</title>
   <style>
     :root {
       --xp-blue: #245edb;
@@ -771,6 +771,278 @@
       font-weight: 400;
     }
 
+    .defense-board {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      cursor: crosshair;
+      touch-action: manipulation;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.07) 50%) 0 0 / 100% 4px,
+        radial-gradient(circle at 50% 48%, rgba(67, 255, 139, 0.22), transparent 31%),
+        radial-gradient(circle at 18% 22%, rgba(78, 151, 255, 0.18), transparent 26%),
+        radial-gradient(circle at 80% 76%, rgba(255, 45, 85, 0.18), transparent 28%),
+        #06101d;
+      color: #d7e4ff;
+      isolation: isolate;
+    }
+
+    .defense-board::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.36;
+      background:
+        linear-gradient(90deg, rgba(116, 205, 255, 0.2) 1px, transparent 1px) 0 0 / 42px 42px,
+        linear-gradient(rgba(116, 205, 255, 0.16) 1px, transparent 1px) 0 0 / 42px 42px;
+    }
+
+    .defense-board::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 1;
+      width: 74vmin;
+      height: 74vmin;
+      max-width: 610px;
+      max-height: 610px;
+      border: 1px dashed rgba(116, 255, 164, 0.23);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow:
+        0 0 0 70px rgba(116, 255, 164, 0.025),
+        inset 0 0 80px rgba(116, 255, 164, 0.05);
+      pointer-events: none;
+    }
+
+    .defense-board:focus {
+      outline: 3px solid rgba(255, 230, 109, 0.38);
+      outline-offset: -5px;
+    }
+
+    .server-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: clamp(150px, 23vw, 240px);
+      min-height: clamp(88px, 13vw, 126px);
+      padding: 14px 16px;
+      border: 2px solid rgba(132, 255, 145, 0.72);
+      border-radius: 6px;
+      transform: translate(-50%, -50%);
+      color: #dfffe6;
+      text-align: center;
+      background:
+        linear-gradient(180deg, rgba(19, 67, 51, 0.95), rgba(6, 29, 31, 0.96)),
+        repeating-linear-gradient(0deg, transparent 0 10px, rgba(132, 255, 145, 0.08) 11px, transparent 12px);
+      box-shadow:
+        0 0 34px rgba(55, 214, 122, 0.28),
+        inset 0 0 18px rgba(132, 255, 145, 0.12);
+      font-family: var(--mono);
+      pointer-events: none;
+    }
+
+    .server-core span {
+      display: block;
+      margin-bottom: 7px;
+      color: #84ff91;
+      font-size: clamp(13px, 1.7vw, 17px);
+    }
+
+    .server-core strong {
+      display: block;
+      color: #ffe66d;
+      font-size: clamp(19px, 2.8vw, 32px);
+      line-height: 1;
+      text-shadow: 0 0 16px rgba(255, 230, 109, 0.34);
+    }
+
+    .target-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+    }
+
+    .click-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      z-index: 5;
+      max-width: calc(100% - 28px);
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 230, 109, 0.72);
+      border-radius: 4px;
+      transform: translateX(-50%);
+      color: #fff7b1;
+      background: rgba(3, 6, 11, 0.78);
+      box-shadow: 0 0 18px rgba(255, 230, 109, 0.14);
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .threat {
+      position: absolute;
+      left: var(--x, 50%);
+      top: var(--y, 50%);
+      z-index: 5;
+      width: clamp(94px, 12vw, 128px);
+      min-height: 72px;
+      border: 2px solid #1046ad;
+      border-radius: 7px 7px 0 0;
+      padding: 0;
+      transform: translate(-50%, -50%) scale(1);
+      color: #14233a;
+      background: #eeeedf;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
+      overflow: hidden;
+      animation: threatPop 130ms ease both;
+      user-select: none;
+    }
+
+    .threat:focus-visible {
+      outline: 3px solid #ffe66d;
+      outline-offset: 2px;
+    }
+
+    .threat-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 24px;
+      padding: 0 6px 0 8px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(180deg, #428eff, #1047ad);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.36);
+    }
+
+    .threat-close {
+      display: grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #ff8f7b, #ce3724);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .threat-body {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 7px;
+      align-items: center;
+      min-height: 46px;
+      padding: 8px 8px 10px;
+      text-align: left;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .threat-symbol {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: 900;
+      background: radial-gradient(circle at 35% 30%, #fff 0 7%, #ff5570 8%, #b40019 72%);
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3px #9f9f9f;
+    }
+
+    .threat-label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-weight: 900;
+    }
+
+    .threat-timer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #42ff8d, #ffe66d 58%, #ff2d55);
+      transform: scaleX(var(--life, 1));
+      transform-origin: left center;
+    }
+
+    .threat.danger {
+      border-color: #a51320;
+    }
+
+    .threat.danger .threat-title {
+      background: linear-gradient(180deg, #ff6178, #bb1124);
+    }
+
+    .threat.safe {
+      border-color: #087c95;
+      filter: saturate(0.9);
+    }
+
+    .threat.safe .threat-title {
+      background: linear-gradient(180deg, #55c7f3, #0b7897);
+    }
+
+    .threat.safe .threat-symbol {
+      background: radial-gradient(circle at 35% 30%, #fff 0 7%, #74cdff 8%, #0b7897 72%);
+    }
+
+    .threat.expiring {
+      animation: threatPulse 360ms steps(2) infinite;
+    }
+
+    .floating-score {
+      position: absolute;
+      left: var(--x, 50%);
+      top: var(--y, 50%);
+      z-index: 7;
+      transform: translate(-50%, -50%);
+      color: #84ff91;
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 900;
+      text-shadow: 0 0 10px rgba(66, 255, 141, 0.6);
+      pointer-events: none;
+      animation: floatScore 620ms ease-out both;
+    }
+
+    .floating-score.bad {
+      color: #ff8aa0;
+      text-shadow: 0 0 10px rgba(255, 45, 85, 0.55);
+    }
+
+    @keyframes threatPop {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.72);
+      }
+    }
+
+    @keyframes threatPulse {
+      50% {
+        filter: saturate(1.7) brightness(1.2);
+        transform: translate(-50%, -50%) scale(1.05);
+      }
+    }
+
+    @keyframes floatScore {
+      to {
+        opacity: 0;
+        transform: translate(-50%, -94px);
+      }
+    }
+
     .screen-overlay {
       position: absolute;
       inset: 34px 0 0;
@@ -1377,6 +1649,25 @@
         font-size: 13px;
       }
 
+      .defense-board {
+        min-height: 290px;
+      }
+
+      .server-core {
+        width: min(170px, 56vw);
+        min-height: 84px;
+      }
+
+      .threat {
+        width: clamp(86px, 28vw, 112px);
+        min-height: 68px;
+      }
+
+      .click-hint {
+        bottom: 10px;
+        font-size: 11px;
+      }
+
       .popup-layer {
         height: 96px;
         margin-top: 0;
@@ -1464,7 +1755,7 @@
       <div class="titlebar">
         <div class="title-name">
           <span class="app-icon"></span>
-          <span>Reply_2012_CodePanic.exe</span>
+          <span>Reply_2012_ClickPanic.exe</span>
         </div>
         <div class="window-controls" aria-hidden="true">
           <span class="window-control">_</span>
@@ -1492,10 +1783,10 @@
             <div class="readout">
               <div class="readout-item">
                 <span class="readout-label">남은 시간</span>
-                <span class="readout-value" id="timeReadout">90.0</span>
+                <span class="readout-value" id="timeReadout">60.0</span>
               </div>
               <div class="readout-item">
-                <span class="readout-label">정확도</span>
+                <span class="readout-label">방어율</span>
                 <span class="readout-value" id="accuracyReadout">100%</span>
               </div>
             </div>
@@ -1504,7 +1795,7 @@
           <div class="controls">
             <div class="fixed-time-card" aria-label="고정 제한 시간">
               <span class="fixed-time-label">고정 제한 시간</span>
-              <span class="fixed-time-value">90.0s</span>
+              <span class="fixed-time-value">60.0s</span>
             </div>
             <div class="primary-actions">
               <button class="start-btn" id="startBtn" type="button">시작</button>
@@ -1525,26 +1816,30 @@
 
           <div class="mission-card">
             <span class="mission-kicker">긴급 미션</span>
-            <strong class="mission-title" id="missionTitle">방화벽을 복구하라</strong>
-            <span class="mission-detail" id="missionDetail">코드를 끝까지 입력하면 복구됩니다</span>
+            <strong class="mission-title" id="missionTitle">60초 방어 챌린지</strong>
+            <span class="mission-detail" id="missionDetail">빨간 경고창을 최대한 많이 클릭하세요</span>
           </div>
 
           <div class="terminal-shell">
             <div class="terminal-bar">
-              <span>C:\정보실\restore_firewall.js</span>
+              <span>C:\정보실\click_guard.exe</span>
               <span class="leds" aria-hidden="true">
                 <span class="led red"></span>
                 <span class="led yellow"></span>
                 <span class="led green"></span>
               </span>
             </div>
-            <div class="code-wrap" id="codeWrap" tabindex="0" role="textbox" aria-label="코드 입력 영역">
-              <div id="codeRender"></div>
-              <textarea class="typing-input" id="typingInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            <div class="defense-board" id="defenseBoard" tabindex="0" role="application" aria-label="마우스 클릭 방어 영역">
+              <div class="server-core" aria-hidden="true">
+                <span>정보실 서버</span>
+                <strong id="coreStatus">LOCKED</strong>
+              </div>
+              <div class="target-layer" id="targetLayer"></div>
+              <div class="click-hint" id="clickHint">빨간 침입 경고창을 클릭하세요</div>
             </div>
             <div class="input-status">
               <span id="statusLine">SYSTEM READY</span>
-              <span><strong id="typedReadout">0</strong>/<span id="totalReadout">0</span></span>
+              <span><strong id="typedReadout">0</strong><span id="totalReadout">개 차단</span></span>
             </div>
           </div>
         </section>
@@ -1555,7 +1850,7 @@
               <div class="ranking-head">
                 <div>
                   <h2 class="ranking-title">랭킹 보드</h2>
-                  <p class="ranking-copy">모든 참가자는 같은 코드와 90초 제한 시간으로 도전합니다. 점수는 성공 보너스 + 남은 시간 + 정확도 + 진행률입니다.</p>
+                  <p class="ranking-copy">60초 동안 빨간 침입 경고창을 최대한 많이 차단하세요. 점수는 빨강 +1, 놓침 -1, 파랑 -3입니다.</p>
                 </div>
               </div>
               <div class="ranking-controls">
@@ -1575,7 +1870,7 @@
               <h2 class="warning-title">해킹이 감지됐습니다</h2>
               <p class="warning-copy">
                 외부 침입자가 정보실 PC에 접근 중입니다.<br>
-                모두 같은 코드입니다. 90초 안에 입력해 시스템을 복구하세요.
+                60초 동안 빨간 경고창을 최대한 많이 클릭해 시스템을 방어하세요.
               </p>
               <div class="overlay-actions">
                 <button class="overlay-action" id="confirmStartBtn" type="button">복구 시작</button>
@@ -1602,7 +1897,7 @@
     <footer class="taskbar">
       <button class="start-menu" id="taskStart" type="button">start</button>
       <div class="task-buttons">
-        <div class="task-button">Reply_2012_CodePanic.exe</div>
+        <div class="task-button">Reply_2012_ClickPanic.exe</div>
         <button class="task-button - NATEON_login.dll" id="clearRankingBtn" type="button">초기화</button>
       </div>
       <div class="tray">
@@ -1612,7 +1907,7 @@
     </footer>
   </main>
 
-  <script>
+  <script type="application/x-legacy-codepanic">
     const snippets = [
 `bad_ips = ["211.201.2.12", "10.0.0.7"]
 
@@ -2511,6 +2806,783 @@ save_log("web_guard.txt")`
       typingInput.value = state.typed;
     });
     typingInput.addEventListener("paste", (event) => event.preventDefault());
+    document.addEventListener("keydown", handleGlobalKeydown);
+
+    boot();
+  </script>
+
+  <script>
+    const MISSIONS = [{
+      title: "60초 방어 챌린지",
+      detail: "빨간 침입 창을 최대한 많이 클릭해 차단",
+      complete: "침입 경고 차단 완료"
+    }];
+
+    const DANGER_TYPES = [
+      { title: "Virus Alert", label: "악성코드", symbol: "!" },
+      { title: "Port Scan", label: "포트스캔", symbol: "!" },
+      { title: "Password Leak", label: "비밀번호 탈취", symbol: "!" },
+      { title: "Ransomware", label: "랜섬웨어", symbol: "!" },
+      { title: "Phishing.exe", label: "피싱 팝업", symbol: "!" }
+    ];
+
+    const SAFE_TYPES = [
+      { title: "School LAN", label: "정상 패킷", symbol: "OK" },
+      { title: "Class File", label: "수업 자료", symbol: "OK" },
+      { title: "Printer", label: "프린터 신호", symbol: "OK" }
+    ];
+
+    const ALERT_MESSAGES = [
+      "외부 접속 감지: 211.201.2.12",
+      "빨간 창을 클릭해 차단하세요.",
+      "NATEON.exe 응답 없음",
+      "방화벽 설정 변경 시도",
+      "USB_AUTORUN.vbs 실행 감지",
+      "교무실 공유폴더 접근 시도",
+      "패킷 손실률 급상승",
+      "C 드라이브 암호화 요청 감지"
+    ];
+
+    const TOTAL_TIME = 60;
+    const SAFE_PACKET_CHANCE = 0.46;
+    const RED_RESPAWN_DELAY = 420;
+    const RED_RESPAWN_LIMIT = 2;
+    const RED_FAST_PHASE_START = 35;
+    const RED_EARLY_DURATION = 1000;
+    const RED_LATE_DURATION = 600;
+    const BREACH_RECOVERY_TARGET = 45;
+    const RANKING_STORAGE_KEY = "reply2012-clickpanic-rankings";
+    const BREACH_LIMIT = 100;
+    const BREACH_TIME_WEIGHT = 20;
+    const BREACH_ESCAPE_PENALTY = 9;
+    const BREACH_MISTAKE_PENALTY = 7;
+    const BREACH_PROGRESS_RECOVERY = 26;
+
+    const state = {
+      mode: "ranking",
+      timeLeft: TOTAL_TIME,
+      startedAt: 0,
+      timerId: null,
+      spawnId: null,
+      popupId: null,
+      threatId: 0,
+      threats: new Map(),
+      playerName: "",
+      blocked: 0,
+      escaped: 0,
+      mistakes: 0,
+      clicks: 0,
+      combo: 0,
+      maxCombo: 0,
+      popups: 0,
+      finalResult: null,
+      audio: null
+    };
+
+    const app = document.getElementById("app");
+    const mainWindow = document.getElementById("mainWindow");
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const taskStart = document.getElementById("taskStart");
+    const overlay = document.getElementById("overlay");
+    const rankingPanel = document.getElementById("rankingPanel");
+    const warningPanel = document.getElementById("warningPanel");
+    const resultPanel = document.getElementById("resultPanel");
+    const playerStartForm = document.getElementById("playerStartForm");
+    const rankingBoard = document.getElementById("rankingBoard");
+    const clearRankingBtn = document.getElementById("clearRankingBtn");
+    const confirmStartBtn = document.getElementById("confirmStartBtn");
+    const cancelStartBtn = document.getElementById("cancelStartBtn");
+    const playerNameInput = document.getElementById("playerNameInput");
+    const overlayAction = document.getElementById("overlayAction");
+    const showRankingBtn = document.getElementById("showRankingBtn");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultCopy = document.getElementById("resultCopy");
+    const scoreSummary = document.getElementById("scoreSummary");
+    const defenseBoard = document.getElementById("defenseBoard");
+    const targetLayer = document.getElementById("targetLayer");
+    const coreStatus = document.getElementById("coreStatus");
+    const clickHint = document.getElementById("clickHint");
+    const timeReadout = document.getElementById("timeReadout");
+    const accuracyReadout = document.getElementById("accuracyReadout");
+    const breachFill = document.getElementById("breachFill");
+    const breachText = document.getElementById("breachText");
+    const typedReadout = document.getElementById("typedReadout");
+    const totalReadout = document.getElementById("totalReadout");
+    const statusLine = document.getElementById("statusLine");
+    const log = document.getElementById("log");
+    const popupLayer = document.getElementById("popupLayer");
+    const glitch = document.getElementById("glitch");
+    const panicTitle = document.getElementById("panicTitle");
+    const panicCode = document.getElementById("panicCode");
+    const missionTitle = document.getElementById("missionTitle");
+    const missionDetail = document.getElementById("missionDetail");
+    const clockText = document.getElementById("clockText");
+    let rankings = loadRankings();
+
+    function boot() {
+      updateMission();
+      updateStats();
+      addLog("C:\\> boot classroom click guard");
+      addLog("MODE: Reply 2012 / mouse defense");
+      updateClock();
+      setInterval(updateClock, 1000);
+      showRanking();
+    }
+
+    function requestStartGame(event) {
+      event?.preventDefault();
+      state.playerName = normalizePlayerName(playerNameInput.value);
+      playerNameInput.value = state.playerName;
+      state.mode = "warning";
+      showPanel("warning");
+      overlay.className = "screen-overlay warning visible";
+      panicTitle.textContent = "침입 경고";
+      panicCode.textContent = "INTRUSION";
+      statusLine.textContent = "WAITING CONFIRM";
+      coreStatus.textContent = "ALERT";
+      addLog(`ALERT: intrusion detected for ${state.playerName}`);
+      flashGlitch();
+      beep(210, 0.13, "sawtooth", 0.09);
+      setTimeout(() => confirmStartBtn.focus(), 0);
+    }
+
+    function beginGame() {
+      state.playerName = normalizePlayerName(playerNameInput.value);
+      playerNameInput.value = state.playerName;
+      clearGameLoops();
+      resetAttemptState();
+      state.mode = "running";
+      state.startedAt = performance.now();
+      overlay.className = "screen-overlay";
+      startBtn.disabled = true;
+      panicTitle.textContent = "해킹을 당하는 중입니다!";
+      panicCode.textContent = "TRACE 0x2012";
+      statusLine.textContent = "CLICK RED ALERTS";
+      coreStatus.textContent = "LOCKED";
+      clickHint.textContent = "빨간 침입 경고창을 클릭하세요";
+      app.classList.remove("danger-mode");
+      updateStats();
+      addLog("WARNING: unauthorized packet stream");
+      addLog(`MISSION: ${MISSIONS[0].title}`);
+      focusBoard();
+      beep(440, 0.08, "square", 0.08);
+      setTimeout(() => spawnAlert("빨간 창을 클릭해 차단하세요."), 250);
+      spawnThreat(true);
+      scheduleNextSpawn();
+      state.timerId = setInterval(tick, 80);
+      state.popupId = setInterval(() => {
+        if (state.mode === "running") {
+          spawnAlert();
+          flashGlitch();
+        }
+      }, 3600);
+    }
+
+    function resetAttemptState() {
+      state.timeLeft = TOTAL_TIME;
+      state.threatId = 0;
+      state.threats.clear();
+      state.blocked = 0;
+      state.escaped = 0;
+      state.mistakes = 0;
+      state.clicks = 0;
+      state.combo = 0;
+      state.maxCombo = 0;
+      state.popups = 0;
+      state.finalResult = null;
+      popupLayer.innerHTML = "";
+      targetLayer.innerHTML = "";
+    }
+
+    function tick() {
+      const elapsed = (performance.now() - state.startedAt) / 1000;
+      state.timeLeft = Math.max(0, TOTAL_TIME - elapsed);
+      updateThreatLifetimes();
+      const breach = updateStats();
+
+      if (state.timeLeft <= 10 || breach >= 72) {
+        app.classList.add("danger-mode");
+        panicCode.textContent = "LOCKDOWN " + Math.ceil(state.timeLeft).toString().padStart(2, "0");
+      }
+
+      if (state.timeLeft <= 0) {
+        finishGame("TIME_UP");
+      }
+    }
+
+    function resetGame() {
+      clearGameLoops();
+      resetAttemptState();
+      state.mode = "ranking";
+      app.classList.remove("danger-mode");
+      startBtn.disabled = false;
+      panicTitle.textContent = "해킹을 당하는 중입니다!";
+      panicCode.textContent = "TRACE 0x2012";
+      statusLine.textContent = "SYSTEM READY";
+      coreStatus.textContent = "LOCKED";
+      clickHint.textContent = "빨간 침입 경고창을 클릭하세요";
+      updateMission();
+      updateStats();
+      addLog("C:\\> reset");
+      showRanking();
+    }
+
+    function clearGameLoops() {
+      if (state.timerId) clearInterval(state.timerId);
+      if (state.spawnId) clearTimeout(state.spawnId);
+      if (state.popupId) clearInterval(state.popupId);
+      state.timerId = null;
+      state.spawnId = null;
+      state.popupId = null;
+    }
+
+    function updateMission() {
+      missionTitle.textContent = MISSIONS[0].title;
+      missionDetail.textContent = MISSIONS[0].detail;
+    }
+
+    function showPanel(panelName) {
+      rankingPanel.hidden = panelName !== "ranking";
+      warningPanel.hidden = panelName !== "warning";
+      resultPanel.hidden = panelName !== "result";
+    }
+
+    function showRanking() {
+      const fromResult = state.mode === "success" || state.mode === "fail";
+      state.mode = "ranking";
+      clearGameLoops();
+      state.threats.clear();
+      targetLayer.innerHTML = "";
+      showPanel("ranking");
+      renderRanking();
+      overlay.className = "screen-overlay ranking visible";
+      startBtn.disabled = false;
+      app.classList.remove("danger-mode");
+      if (fromResult) {
+        playerNameInput.value = "";
+      }
+      setTimeout(() => playerNameInput.focus(), 0);
+    }
+
+    function handleClearRanking(event) {
+      event.preventDefault();
+      if (!window.confirm("랭킹 기록을 모두 삭제할까요?")) return;
+      rankings = [];
+      saveRankings();
+      renderRanking();
+      addLog("RANKING: cleared");
+    }
+
+    function normalizePlayerName(name) {
+      const cleaned = name.trim().replace(/\s+/g, " ");
+      if (cleaned) return cleaned.slice(0, 14);
+      return `PLAYER ${String(rankings.length + 1).padStart(2, "0")}`;
+    }
+
+    function loadRankings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(RANKING_STORAGE_KEY) || "[]");
+        if (!Array.isArray(saved)) return [];
+        return saved
+          .filter((entry) => entry && typeof entry === "object")
+          .map((entry) => {
+            const blocked = Number(entry.blocked) || 0;
+            const escaped = Number(entry.escaped) || 0;
+            const mistakes = Number(entry.mistakes) || 0;
+            return {
+              id: Number(entry.id) || Date.now(),
+              name: String(entry.name || "PLAYER"),
+              score: getAttemptScore(blocked, escaped, mistakes),
+              success: Boolean(entry.success),
+              remaining: Number(entry.remaining) || 0,
+              elapsed: Number(entry.elapsed) || TOTAL_TIME,
+              defenseRate: Number(entry.defenseRate) || 0,
+              blocked,
+              escaped,
+              mistakes,
+              maxCombo: Number(entry.maxCombo) || 0,
+              mission: String(entry.mission || "클릭 방어 미션"),
+              createdAt: String(entry.createdAt || new Date().toISOString())
+            };
+          });
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveRankings() {
+      rankings.sort(sortRanking);
+      rankings = rankings.slice(0, 50);
+      try {
+        localStorage.setItem(RANKING_STORAGE_KEY, JSON.stringify(rankings));
+      } catch (error) {
+        addLog("WARN: ranking save failed");
+      }
+    }
+
+    function sortRanking(a, b) {
+      return b.score - a.score ||
+        b.blocked - a.blocked ||
+        b.defenseRate - a.defenseRate ||
+        b.maxCombo - a.maxCombo ||
+        a.mistakes - b.mistakes;
+    }
+
+    function renderRanking() {
+      rankings.sort(sortRanking);
+
+      if (rankings.length === 0) {
+        rankingBoard.innerHTML = '<p class="ranking-empty">아직 기록이 없습니다. 첫 참가자를 등록하고 도전을 시작하세요.</p>';
+        return;
+      }
+
+      const rows = rankings.slice(0, 10).map((entry, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(entry.name)}</td>
+          <td>${entry.blocked}개</td>
+          <td>${entry.defenseRate}%</td>
+          <td>${entry.maxCombo}</td>
+          <td>${entry.score}</td>
+        </tr>
+      `).join("");
+
+      rankingBoard.innerHTML = `
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>참가자</th>
+              <th>차단 수</th>
+              <th>방어율</th>
+              <th>최대 콤보</th>
+              <th>점수</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function finalizeAttempt(success = true, reason = "TIME_UP") {
+      const defenseRate = getDefenseRate();
+      const remaining = Number(state.timeLeft.toFixed(1));
+      const elapsed = Number((TOTAL_TIME - state.timeLeft).toFixed(1));
+      const score = calculateScore({ defenseRate });
+      const result = {
+        id: Date.now(),
+        name: state.playerName,
+        score,
+        success,
+        remaining,
+        elapsed,
+        defenseRate,
+        blocked: state.blocked,
+        escaped: state.escaped,
+        mistakes: state.mistakes,
+        maxCombo: state.maxCombo,
+        mission: MISSIONS[0].title,
+        reason,
+        createdAt: new Date().toISOString()
+      };
+
+      state.finalResult = result;
+      rankings.push(result);
+      saveRankings();
+      return result;
+    }
+
+    function calculateScore(result) {
+      return getAttemptScore(state.blocked, state.escaped, state.mistakes);
+    }
+
+    function getAttemptScore(blocked, escaped, mistakes) {
+      return blocked - escaped - mistakes * 3;
+    }
+
+    function renderResult(result) {
+      const rankIndex = rankings.findIndex((entry) => entry.id === result.id) + 1;
+      const grade = getGrade(result);
+      showPanel("result");
+      overlay.className = "screen-overlay success visible";
+      resultTitle.textContent = "방어 종료";
+      resultCopy.textContent = `RANK ${rankIndex} · GRADE ${grade} · 빨간 경고창 ${result.blocked}개 차단`;
+      overlayAction.textContent = "다음 참가자";
+      scoreSummary.innerHTML = `
+        <div class="score-chip"><span>차단 수</span><strong>${result.blocked}개</strong></div>
+        <div class="score-chip"><span>점수</span><strong>${result.score}</strong></div>
+        <div class="score-chip"><span>방어율</span><strong>${result.defenseRate}%</strong></div>
+        <div class="score-chip"><span>최대 콤보</span><strong>${result.maxCombo}</strong></div>
+      `;
+    }
+
+    function getGrade(result) {
+      if (result.blocked >= 50) return "S";
+      if (result.blocked >= 40) return "A";
+      if (result.blocked >= 30) return "B";
+      return "C";
+    }
+
+    function finishGame(reason = "TIME_UP") {
+      if (state.mode !== "running") return;
+      state.mode = "success";
+      clearGameLoops();
+      clearThreats();
+      startBtn.disabled = false;
+      app.classList.remove("danger-mode");
+      const result = finalizeAttempt(true, reason);
+      renderResult(result);
+      panicTitle.textContent = "60초 방어 종료";
+      panicCode.textContent = "ACCESS DENIED";
+      statusLine.textContent = "TIME UP";
+      coreStatus.textContent = "SAFE";
+      clickHint.textContent = `${result.blocked}개 차단`;
+      addLog("RESULT: 60 second defense complete");
+      addLog(`RESULT: blocked ${result.blocked}, score ${result.score}`);
+      beep(523, 0.08, "square", 0.08);
+      setTimeout(() => beep(659, 0.08, "square", 0.08), 90);
+      setTimeout(() => beep(784, 0.12, "square", 0.08), 180);
+    }
+
+    function failGame(reason = "TIME_LIMIT_EXCEEDED") {
+      if (state.mode !== "running") return;
+      state.mode = "fail";
+      clearGameLoops();
+      clearThreats();
+      startBtn.disabled = false;
+      const result = finalizeAttempt(false, reason);
+      renderResult(result);
+      panicTitle.textContent = "복구 실패";
+      panicCode.textContent = "BLUE SCREEN";
+      statusLine.textContent = "FAILED";
+      coreStatus.textContent = "LOCKED";
+      clickHint.textContent = "다음 참가자가 다시 도전할 수 있습니다";
+      addLog(`FAIL: ${reason}, score ${result.score}`);
+      flashGlitch();
+      mainWindow.classList.add("shake");
+      setTimeout(() => mainWindow.classList.remove("shake"), 270);
+      beep(160, 0.18, "sawtooth", 0.1);
+      setTimeout(() => beep(90, 0.22, "sawtooth", 0.09), 160);
+    }
+
+    function scheduleNextSpawn() {
+      if (state.mode !== "running") return;
+      const elapsed = TOTAL_TIME - state.timeLeft;
+      const interval = Math.max(390, 880 - state.blocked * 10 - elapsed * 3);
+      state.spawnId = setTimeout(() => {
+        spawnThreat();
+        scheduleNextSpawn();
+      }, interval);
+    }
+
+    function spawnThreat(forceDanger = false) {
+      if (state.mode !== "running") return;
+      const activeLimit = Math.min(9, 5 + Math.floor(state.blocked / 10));
+      if (state.threats.size >= activeLimit) return;
+
+      const isDanger = forceDanger || Math.random() >= SAFE_PACKET_CHANCE;
+      const pool = isDanger ? DANGER_TYPES : SAFE_TYPES;
+      const type = pool[Math.floor(Math.random() * pool.length)];
+      const position = getSpawnPosition();
+      const elapsed = TOTAL_TIME - state.timeLeft;
+      const duration = isDanger
+        ? getRedDuration(elapsed)
+        : Math.max(1450, 3150 - state.blocked * 34 - elapsed * 10 + Math.random() * 260);
+      const id = ++state.threatId;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `threat ${isDanger ? "danger" : "safe"}`;
+      button.dataset.id = String(id);
+      button.style.setProperty("--x", `${position.x}%`);
+      button.style.setProperty("--y", `${position.y}%`);
+      button.style.setProperty("--life", "1");
+      button.setAttribute("aria-label", `${type.label} ${isDanger ? "차단" : "정상 패킷"}`);
+      button.innerHTML = `
+        <span class="threat-title">
+          <span>${escapeHtml(type.title)}</span>
+          <span class="threat-close">×</span>
+        </span>
+        <span class="threat-body">
+          <span class="threat-symbol">${escapeHtml(type.symbol)}</span>
+          <span class="threat-label">${escapeHtml(type.label)}</span>
+        </span>
+        <span class="threat-timer" aria-hidden="true"></span>
+      `;
+      button.addEventListener("pointerdown", handleThreatPointer);
+      targetLayer.appendChild(button);
+      state.threats.set(id, {
+        id,
+        element: button,
+        danger: isDanger,
+        label: type.label,
+        x: position.x,
+        y: position.y,
+        spawnedAt: performance.now(),
+        expiresAt: performance.now() + duration,
+        duration
+      });
+    }
+
+    function getSpawnPosition() {
+      for (let tries = 0; tries < 20; tries += 1) {
+        const x = 10 + Math.random() * 80;
+        const y = 14 + Math.random() * 72;
+        const dx = x - 50;
+        const dy = y - 50;
+        if (Math.hypot(dx * 1.3, dy) > 22) {
+          return { x, y };
+        }
+      }
+      return { x: 16 + Math.random() * 68, y: 14 + Math.random() * 72 };
+    }
+
+    function getRedDuration(elapsed) {
+      return elapsed < RED_FAST_PHASE_START ? RED_EARLY_DURATION : RED_LATE_DURATION;
+    }
+
+    function handleThreatPointer(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      resolveThreat(Number(event.currentTarget.dataset.id));
+    }
+
+    function resolveThreat(id) {
+      if (state.mode !== "running") return;
+      const threat = state.threats.get(id);
+      if (!threat) return;
+      state.threats.delete(id);
+      threat.element.remove();
+      state.clicks += 1;
+
+      if (threat.danger) {
+        state.blocked += 1;
+        state.combo += 1;
+        state.maxCombo = Math.max(state.maxCombo, state.combo);
+        statusLine.textContent = `BLOCKED +${state.combo} COMBO`;
+        coreStatus.textContent = "GUARD";
+        clickHint.textContent = `${state.blocked}개 차단 중`;
+        showFloatingScore(threat.x, threat.y, "+1");
+        addLog(`BLOCKED: ${threat.label} (${state.blocked})`);
+        beep(620 + Math.min(state.combo, 10) * 24, 0.045, "square", 0.045);
+        setTimeout(() => {
+          if (state.mode === "running" && countActiveDanger() < RED_RESPAWN_LIMIT) {
+            spawnThreat(true);
+          }
+        }, Math.max(220, RED_RESPAWN_DELAY - state.blocked * 2));
+      } else {
+        state.mistakes += 1;
+        state.combo = 0;
+        statusLine.textContent = "NORMAL PACKET CLICKED";
+        coreStatus.textContent = "CAUTION";
+        clickHint.textContent = "파란 정상 패킷은 누르지 마세요";
+        showFloatingScore(threat.x, threat.y, "-3", true);
+        addLog(`MISSCLICK: ${threat.label} (-3)`);
+        flashGlitch();
+        mainWindow.classList.add("shake");
+        setTimeout(() => mainWindow.classList.remove("shake"), 270);
+        beep(180, 0.11, "sawtooth", 0.065);
+      }
+
+      updateStats();
+    }
+
+    function updateThreatLifetimes() {
+      const now = performance.now();
+      for (const threat of Array.from(state.threats.values())) {
+        const life = Math.max(0, (threat.expiresAt - now) / threat.duration);
+        threat.element.style.setProperty("--life", String(life));
+        threat.element.classList.toggle("expiring", threat.danger && life < 0.34);
+        if (life <= 0) {
+          expireThreat(threat.id);
+        }
+      }
+    }
+
+    function expireThreat(id) {
+      const threat = state.threats.get(id);
+      if (!threat) return;
+      state.threats.delete(id);
+      threat.element.remove();
+      if (!threat.danger) return;
+
+      state.escaped += 1;
+      state.combo = 0;
+      statusLine.textContent = "ALERT ESCAPED";
+      coreStatus.textContent = "BREACH";
+      clickHint.textContent = "빨간 창이 사라지기 전에 클릭하세요";
+      showFloatingScore(threat.x, threat.y, "MISS -1", true);
+      addLog(`BREACH: ${threat.label} escaped (-1)`);
+      flashGlitch();
+      beep(120, 0.12, "sawtooth", 0.07);
+    }
+
+    function clearThreats() {
+      state.threats.clear();
+      targetLayer.innerHTML = "";
+    }
+
+    function countActiveDanger() {
+      let count = 0;
+      for (const threat of state.threats.values()) {
+        if (threat.danger) count += 1;
+      }
+      return count;
+    }
+
+    function showFloatingScore(x, y, text, bad = false) {
+      const score = document.createElement("div");
+      score.className = `floating-score${bad ? " bad" : ""}`;
+      score.style.setProperty("--x", `${x}%`);
+      score.style.setProperty("--y", `${y}%`);
+      score.textContent = text;
+      targetLayer.appendChild(score);
+      setTimeout(() => score.remove(), 650);
+    }
+
+    function updateStats() {
+      const progress = Math.min(1, state.blocked / BREACH_RECOVERY_TARGET);
+      const timePressure = 1 - state.timeLeft / TOTAL_TIME;
+      const breach = Math.min(BREACH_LIMIT, Math.max(0, Math.round(
+        timePressure * BREACH_TIME_WEIGHT +
+        state.escaped * BREACH_ESCAPE_PENALTY +
+        state.mistakes * BREACH_MISTAKE_PENALTY -
+        progress * BREACH_PROGRESS_RECOVERY
+      )));
+      const defenseRate = getDefenseRate();
+
+      timeReadout.textContent = state.timeLeft.toFixed(1);
+      accuracyReadout.textContent = `${defenseRate}%`;
+      breachFill.style.width = `${breach}%`;
+      breachText.textContent = `${breach}%`;
+      typedReadout.textContent = String(state.blocked);
+      totalReadout.textContent = "개 차단";
+      return breach;
+    }
+
+    function getDefenseRate() {
+      const attempts = state.blocked + state.escaped + state.mistakes;
+      if (attempts === 0) return 100;
+      return Math.max(0, Math.round((state.blocked / attempts) * 100));
+    }
+
+    function spawnAlert(forcedMessage) {
+      if (state.mode !== "running") return;
+      const alert = document.createElement("div");
+      alert.className = "alert-window";
+      const message = forcedMessage || ALERT_MESSAGES[Math.floor(Math.random() * ALERT_MESSAGES.length)];
+      alert.innerHTML = `
+        <div class="alert-title">
+          <span>Security Center</span>
+          <span class="alert-close">×</span>
+        </div>
+        <div class="alert-body">
+          <div class="alert-symbol">!</div>
+          <div class="alert-message">${escapeHtml(message)}</div>
+        </div>
+      `;
+      popupLayer.appendChild(alert);
+      state.popups += 1;
+      addLog(`ALERT: ${message}`);
+      if (popupLayer.children.length > 3) {
+        popupLayer.children[0].remove();
+      }
+      beep(720 - Math.min(state.popups, 5) * 60, 0.045, "square", 0.045);
+    }
+
+    function flashGlitch() {
+      glitch.classList.remove("active");
+      void glitch.offsetWidth;
+      glitch.classList.add("active");
+    }
+
+    function focusBoard() {
+      defenseBoard.focus();
+    }
+
+    function addLog(text) {
+      const line = document.createElement("div");
+      line.textContent = `> ${text}`;
+      log.appendChild(line);
+      while (log.children.length > 8) {
+        log.children[0].remove();
+      }
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function beep(freq, duration, type, gain) {
+      try {
+        if (!state.audio) {
+          state.audio = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const oscillator = state.audio.createOscillator();
+        const volume = state.audio.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = freq;
+        volume.gain.setValueAtTime(gain, state.audio.currentTime);
+        volume.gain.exponentialRampToValueAtTime(0.001, state.audio.currentTime + duration);
+        oscillator.connect(volume);
+        volume.connect(state.audio.destination);
+        oscillator.start();
+        oscillator.stop(state.audio.currentTime + duration);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      const label = hours >= 12 ? "PM" : "AM";
+      const twelve = hours % 12 || 12;
+      clockText.textContent = `${twelve.toString().padStart(2, "0")}:${minutes} ${label}`;
+    }
+
+    function handleGlobalKeydown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        resetGame();
+        return;
+      }
+
+      if (event.key === "Enter" && state.mode === "ranking") {
+        event.preventDefault();
+        requestStartGame();
+        return;
+      }
+
+      if (event.key === "Enter" && state.mode === "warning") {
+        event.preventDefault();
+        beginGame();
+        return;
+      }
+
+      if (event.key === "Enter" && (state.mode === "success" || state.mode === "fail")) {
+        event.preventDefault();
+        showRanking();
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    playerStartForm.addEventListener("submit", requestStartGame);
+    clearRankingBtn.addEventListener("click", handleClearRanking);
+    confirmStartBtn.addEventListener("click", beginGame);
+    cancelStartBtn.addEventListener("click", showRanking);
+    startBtn.addEventListener("click", requestStartGame);
+    taskStart.addEventListener("click", requestStartGame);
+    overlayAction.addEventListener("click", showRanking);
+    showRankingBtn.addEventListener("click", showRanking);
+    resetBtn.addEventListener("click", resetGame);
+    defenseBoard.addEventListener("click", focusBoard);
     document.addEventListener("keydown", handleGlobalKeydown);
 
     boot();
